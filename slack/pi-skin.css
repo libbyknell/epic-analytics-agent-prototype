@@ -1,0 +1,308 @@
+/* pi-skin.css — Proactive Intelligence project skin, layered AFTER chrome/slack-shell/slack-shell.css.
+   Why: the kit's data-theme="v2" is the lavender BRK build; the reference captures 12-14
+   (2026-10-14_17-10-15 / 17-18-33 / 17-18-50) show the same newer rail (Today / Home / DMs / Activity /
+   Files / To-dos / Agents & tools) on the default aubergine theme, with a workspace column left of the rail
+   and no AI-features banner. Chrome colours below are sampled from capture 12 (median 3x3, see
+   _build/ notes) and live only in chrome regions. Content components (chart card, prompts menu,
+   outlook tile, canvas, report) are new to this project; every non-token colour is in _kit/palette-extra.css. */
+
+/* ---------- frame + layout (1680x950 css; capture scale 0.85) ---------- */
+[data-theme="v2"].pi { --sk-sidebar-w: 222px; --pi-ws-w: 56px; background: #4e104d; }
+body.is-fullbleed:has(.pi) { background: #4e104d; }
+.pi .sk-app { background: linear-gradient(180deg, #4e104d 0%, #460446 100%); }
+.pi .sk-body { padding: 0 4px 4px 0; }
+.pi .sk-v2-banner { display: none; }
+
+/* top bar: traffic lights + sidebar toggle left, history right-aligned before a centred search */
+.pi .sk-topnav { background: #511251; height: 38px; padding: 0 8px 0 12px; gap: 6px; }
+.pi .sk-topnav .sk-traffic { display: flex; border-right: 0; padding-right: 0; margin-right: 8px; }
+.pi .sk-topnav .sk-topnav-btn[aria-label="Toggle sidebar"] { display: flex; }
+.pi .sk-topnav-history { flex: 0 0 480px; justify-content: flex-start; gap: 4px; padding-right: 6px; }
+.pi .sk-topnav-history .pi-hist-gap { flex: 1 1 auto; }
+.pi .sk-topnav-btn { color: rgba(255,255,255,.86); }
+.pi .sk-topnav-btn.is-disabled { color: rgba(255,255,255,.4); }
+.pi .sk-topnav-search { flex: 0 0 735px; max-width: 735px; background: #7f5184; color: rgba(255,255,255,.88); border-radius: 6px; height: 26px; }
+.pi .sk-v2-slackbot-btn { background: transparent; margin-left: 6px; }
+.pi .sk-v2-topnav-spacer { flex: 1 1 auto; }
+.pi .sk-topnav-right { flex: 0 0 auto; }
+.pi .sk-topnav-right .sk-topnav-btn { color: #fff; }
+
+/* workspace column (signed-in workspaces) */
+.pi .pi-ws-col { width: var(--pi-ws-w); flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 14px; }
+.pi .pi-ws-tile { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; color: #fff; background: #0f6e7a; box-shadow: 0 0 0 2px #4e104d, 0 0 0 4px #e8e0f3; }
+.pi .pi-ws-add { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.86); }
+.pi .pi-ws-add svg { width: 20px; height: 20px; }
+
+/* rail + sidebar = one continuous card */
+.pi .sk-rail { background: linear-gradient(180deg, #653069 0%, #612c64 45%, #5a225c 100%); border-radius: 10px 0 0 10px; padding-top: 10px; }
+.pi .sk-account-switch { display: none; }
+.pi .sk-rail-tabs { gap: 3px; }
+.pi .sk-rail-tab { padding: 4px 0 6px; gap: 3px; width: 62px; }
+.pi .sk-rail-tab, .pi .sk-rail-tab .sk-rail-tab-icon, .pi .sk-rail-tab.is-active, .pi .sk-rail-tab.is-active .sk-rail-tab-icon { color: #fff; }
+.pi .sk-rail-tab.is-active .sk-rail-tab-icon { background: #8c6590; border-radius: 9px; }
+.pi .sk-rail-tab:not(.is-active):hover .sk-rail-tab-icon { background: rgba(255,255,255,.12); border-radius: 9px; }
+.pi .sk-rail-tab-label { color: #fff; font-weight: 700; font-size: 11px; line-height: 12px; }
+.pi .sk-v2-rail-circle { background: #875d89; color: #fff; margin-bottom: 10px; }
+.pi .sk-rail-user .sk-presence { box-shadow: 0 0 0 2px #5a225c; }
+.pi .sk-rail-user img { background: transparent; }
+
+.pi .sk-sidebar { background: linear-gradient(180deg, #653069 0%, #612c64 45%, #5b255c 100%); color: #fff; border-radius: 0; border-right: 0; box-shadow: inset 1px 0 0 rgba(255,255,255,.08); }
+.pi .sk-sidebar-header { padding: 0 6px 0 14px; height: 46px; }
+.pi .sk-sidebar-ws { color: #fff; font-size: 18px; max-width: 150px; }
+.pi .sk-sidebar-icon-btn { color: #fff; }
+.pi .sk-sidebar-icon-btn:hover { background: rgba(255,255,255,.12); }
+.pi .sk-v2-find { margin: 0 8px 10px; height: 26px; background: #764a7a; border: 0; color: rgba(255,255,255,.82); }
+.pi .sk-row { color: rgba(255,255,255,.88); padding-left: 10px; margin: 0 6px; height: 27px; }
+.pi .sk-row:hover { background: rgba(255,255,255,.1); }
+.pi .sk-row.is-child { padding-left: 22px; }
+.pi .sk-row.is-active { background: #fbefff; color: #39063a; }
+.pi .sk-row.is-active svg { color: #39063a; }
+.pi .sk-row.is-active .sk-row-label { color: #39063a; }
+.pi .sk-row.has-unread .sk-row-label, .pi .sk-row.is-strong .sk-row-label { color: #fff; font-weight: 700; }
+.pi .sk-row-badge { background: #e01e5a; }
+.pi .sk-row-dm-avatar { border-radius: 5px; }
+.pi .sk-row-dm-avatar.is-contain { background: #fff; object-fit: contain; padding: 2px; }
+.pi .pi-row-sq { width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,.22); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.pi .sk-section-heading { color: rgba(255,255,255,.88); font-size: 15px; padding-left: 16px; margin: 2px 0 0; }
+.pi .sk-v2-sidebar-rule { background: rgba(255,255,255,.16); margin: 8px 14px; }
+.pi .sk-v2-drag-hint, .pi .pi-files-hint { color: rgba(255,255,255,.86); padding: 0 16px 6px 40px; font-size: 13px; line-height: 20px; }
+.pi .sk-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); }
+
+/* main + right pane cards */
+.pi .sk-main { border-radius: 0 10px 10px 0; }
+.pi .sk-body.has-panel .sk-main { border-radius: 0 10px 10px 0; }
+.pi .sk-thread-pane, .pi .sk-thread-pane.sk-sbpanel { width: 459px; margin-left: 6px; border-left: 0; border-radius: 10px; background: #fff; }
+.pi .sk-view-header-title { font-size: 18px; }
+.pi .sk-view-header-title .pi-dm-av { width: 24px; height: 24px; border-radius: 6px; }
+.pi .sk-tab svg { width: 16px; height: 16px; }
+
+/* channel/DM composer (newer build: formatting row always visible) */
+.pi .sk-composer-format.is-open { background: transparent; box-shadow: none; height: 34px; padding: 4px 6px 0; }
+.pi .sk-fmt-btn { color: #9a999b; }
+.pi .sk-composer { border-color: #cfcfd0; }
+.pi .sk-composer-input { padding: 6px 12px 4px; }
+.pi .pi-send-up { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #9a999b; }
+.pi .pi-send-up svg { width: 16px; height: 16px; }
+.pi .sk-composer.has-content .pi-send-up { color: #fff; background: #007a5a; border-radius: 6px; }
+.pi .sk-composer-input .sk-sb-chip { color: #1264a3; background: #e8f4ff; border-radius: 4px; padding: 0 4px; display: inline-flex; align-items: center; gap: 4px; }
+.pi .sk-composer-input .sk-sb-chip svg { width: 15px; height: 15px; }
+
+/* ---------- messages ---------- */
+.pi .sk-msg { position: relative; }
+.pi .pi-cont { padding-top: 0; padding-bottom: 2px; }
+.pi .pi-cont .sk-msg-gutter { visibility: hidden; height: 0; }
+.pi .sk-app-badge { font-size: 10px; font-weight: 700; padding: 0 3px; line-height: 14px; }
+.pi .pi-headline { font-weight: 700; font-size: 17px; line-height: 24px; color: #1d1c1d; margin: 2px 0 6px; }
+.pi .sk-v2-text p { margin: 0 0 4px; }
+.pi .pi-bullets { margin: 6px 0 0; padding-left: 22px; font-size: 15px; line-height: 22px; color: #1d1c1d; }
+.pi .pi-bullets li { margin: 0 0 2px; }
+.pi .pi-file { display: flex; align-items: center; gap: 12px; max-width: 420px; padding: 12px; border: 1px solid #dddbda; border-radius: 12px; margin-top: 4px; background: #fff; }
+.pi .pi-file img { width: 36px; height: 36px; border-radius: 6px; }
+.pi .pi-file-name { font-size: 15px; font-weight: 700; color: #1d1c1d; line-height: 20px; }
+.pi .pi-file-sub { font-size: 13px; color: #616061; line-height: 18px; }
+.pi .pi-date-pill { display: flex; justify-content: center; position: sticky; top: 0; z-index: 2; margin: 10px 0 4px; }
+.pi .pi-date-pill::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #dddbda; z-index: -1; }
+.pi .pi-date-pill span { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: #1d1c1d; background: #fff; border: 1px solid #dddbda; border-radius: 16px; padding: 3px 12px; }
+.pi .pi-date-pill span svg { width: 12px; height: 12px; color: #616061; }
+.pi .pi-severity { font-weight: 700; font-size: 15px; line-height: 22px; margin-top: 4px; }
+.pi .pi-plain-line { font-size: 15px; line-height: 22px; color: #1d1c1d; margin: 0; }
+.pi .pi-inline-sb { width: 20px; height: 20px; vertical-align: -5px; border-radius: 4px; margin: 0 2px; }
+.pi .pi-btn { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid #b4b3b5; border-radius: 6px; background: #fff; font: 700 13px/1 var(--sk-font); color: #1d1c1d; margin: 10px 0 2px; }
+.pi .sk-thread-replies { margin-top: 8px; }
+
+/* hover toolbar (newer build: three quick reacts, then actions; Slackbot entry second from the right) */
+.pi .sk-msg-toolbar { top: -18px; right: 20px; border-radius: 8px; padding: 3px; gap: 1px; z-index: 5; }
+.pi .sk-toolbar-btn { width: 30px; height: 30px; border-radius: 6px; font-size: 17px; color: #454447; }
+.pi .sk-toolbar-btn svg { width: 18px; height: 18px; }
+.pi .sk-toolbar-btn.is-on { background: #e8f4ff; }
+.pi .pi-tb-sep { width: 1px; background: #dddbda; margin: 5px 3px; }
+
+/* Suggested prompts menu (drops from the toolbar's Slackbot button) */
+.pi .pi-menu { position: absolute; top: 28px; right: 20px; width: 350px; background: #fff; border: 1px solid #dddbda; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.12); padding: 8px 0; z-index: 6; }
+.pi .pi-menu-head { display: flex; align-items: center; gap: 8px; padding: 6px 16px 10px; font-size: 15px; font-weight: 700; color: #1d1c1d; }
+.pi .pi-menu-head svg { width: 22px; height: 22px; }
+.pi .pi-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 32px; font-size: 15px; color: #1d1c1d; cursor: pointer; white-space: nowrap; }
+.pi .pi-menu-item svg { width: 15px; height: 15px; color: #616061; flex: 0 0 auto; }
+.pi .pi-menu-item.is-hl, .pi .pi-menu-item:hover { background: #1264a3; color: #fff; }
+.pi .pi-menu-item.is-hl svg, .pi .pi-menu-item:hover svg { color: #fff; }
+.pi .pi-menu-rule { height: 1px; background: #dddbda; margin: 8px 0; }
+
+/* ---------- Tableau chart card (Q3 Revenue Outlook) ---------- */
+.pi .pi-chart { width: 100%; max-width: 560px; border: 1px solid #dddbda; border-radius: 8px; background: #fff; margin: 10px 0 6px; overflow: hidden; }
+.pi .pi-chart-head { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-bottom: 1px solid #dddbda; }
+.pi .pi-chart-head .pi-tab-logo { width: 34px; height: 34px; border: 1px solid #dddbda; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.pi .pi-chart-head .pi-tab-logo img { width: 20px; height: 20px; }
+.pi .pi-chart-title { font-size: 15px; font-weight: 700; line-height: 20px; color: #1d1c1d; }
+.pi .pi-chart-sub { font-size: 13px; line-height: 18px; color: #1d1c1d; }
+.pi .pi-chip-red { display: inline-block; margin: 14px 12px 0; background: #fff0f4; color: #c01343; font-size: 13px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+.pi .pi-chart-svg { display: block; width: 100%; height: auto; margin-top: 4px; }
+.pi .pi-chart-svg text { font-family: var(--sk-font); fill: #616061; }
+.pi .pi-legend { display: flex; flex-wrap: wrap; gap: 6px 22px; padding: 2px 14px 12px; font-size: 13px; color: #1d1c1d; }
+.pi .pi-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.pi .pi-legend i { display: inline-block; width: 22px; height: 0; border-top: 2px solid #1d1c1d; }
+.pi .pi-legend i.is-dash { border-top-style: dashed; }
+.pi .pi-legend i.is-blue { border-top-color: #1264a3; }
+.pi .pi-legend i.is-band { height: 10px; border: 0; background: #e5ecf7; }
+.pi .pi-legend i.is-red { border-top-color: #cd2553; }
+.pi .pi-chart-foot { border-top: 1px solid #dddbda; padding: 10px 12px; font-size: 13px; color: #616061; }
+.pi .pi-mark { cursor: default; }
+.pi .pi-mark:hover { stroke-width: 2.5; }
+
+/* ---------- thread pane ---------- */
+.pi .pi-thread-head { height: 49px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 10px 0 16px; box-shadow: inset 0 -1px 0 0 #dddbda; }
+.pi .pi-thread-head .pi-thread-title { font-size: 18px; font-weight: 900; color: #1d1c1d; }
+.pi .pi-thread-head .pi-thread-actions { display: flex; gap: 4px; }
+.pi .pi-thread-head .sk-sb-btn { width: 30px; height: 30px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; color: #1d1c1d; }
+.pi .pi-thread-head .sk-sb-btn svg { width: 18px; height: 18px; }
+.pi .sk-thread-pane .sk-v2-disabled-composer { margin: 0 16px 14px; }
+.pi .sk-thread-pane .pi-chart { max-width: 100%; }
+.pi .sk-thread-pane .sk-thread-root { box-shadow: none; padding: 8px 0 0; }
+.pi .sk-thread-pane .sk-thread-root .sk-msg { padding: 4px 16px; }
+
+/* ---------- Slackbot panel content ---------- */
+.pi .sk-sbpanel .sk-sb-title { font-size: 18px; }
+.pi .sk-sbpanel .sk-sb-title img { width: 26px; height: 26px; }
+.pi .sk-sbpanel .sk-sb-btn { border: 0; background: transparent; }
+.pi .sk-sbpanel .sk-sb-head { height: 50px; }
+.pi .sk-sbpanel .sk-sb-tabs { gap: 20px; }
+.pi .sk-sbpanel .sk-sb-tab-add::after { display: none; }
+.pi .sk-sbpanel .sk-msg-head .sk-app-badge { text-transform: uppercase; }
+.pi .sk-sbpanel .sk-sb-used { font-size: 13px; color: #616061; }
+.pi .sk-sbpanel .sk-sb-used .sk-sb-skill { display: inline-flex; align-items: center; gap: 3px; }
+.pi .sk-sbpanel .sk-sb-used .sk-sb-skill svg { width: 13px; height: 13px; color: #1264a3; }
+.pi .sk-sbpanel .pi-tool-row { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 18px; color: #616061; margin: 0 0 10px; }
+.pi .sk-sbpanel .pi-tool-row svg { width: 13px; height: 13px; flex: 0 0 auto; margin-top: 3px; }
+.pi .sk-sbpanel .pi-tool-row .pi-grow { flex: 1 1 auto; }
+.pi .sk-sbpanel .pi-tool-row.is-inline { display: inline-flex; }
+.pi .sk-sbpanel .sk-sb-chip { font-size: 15px; }
+.pi .sk-sbpanel .sk-sb-chip svg { width: 14px; height: 14px; }
+.pi .sk-sbpanel .sk-sb-rich ul.is-disc { padding-left: 22px; }
+.pi .sk-sbpanel .sk-msg + .sk-msg { margin-top: 6px; }
+.pi .sk-sbpanel .sk-composer-wrap { padding: 8px 12px 12px; }
+
+/* 22% -> 66% outlook tile */
+.pi .pi-tile { display: flex; align-items: center; gap: 14px; border: 1px solid #dddbda; border-radius: 8px; padding: 14px 16px; margin: 10px 0 12px; background: #f8f8f8; }
+.pi .pi-tile-v { font-size: 20px; font-weight: 700; line-height: 24px; }
+.pi .pi-tile-v.is-red { color: #c01343; }
+.pi .pi-tile-v.is-green { color: #007a5a; }
+.pi .pi-tile-l { font-size: 13px; line-height: 16px; color: #616061; }
+.pi .pi-tile-arrow { color: #616061; }
+.pi .pi-tile-arrow svg { width: 16px; height: 16px; display: block; }
+.pi .pi-tile-cap { font-size: 13px; line-height: 17px; color: #454447; max-width: 120px; margin-left: 4px; }
+.pi .sk-sb-action.pi-run { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; font-size: 15px; border-radius: 6px; }
+.pi .sk-sb-action.pi-run svg { width: 12px; height: 12px; }
+
+/* canvas card in the panel */
+.pi .pi-canvas-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #dddbda; border-radius: 8px; margin: 8px 0 6px; background: #fff; cursor: pointer; }
+.pi .pi-canvas-card .pi-cc-ic { width: 36px; height: 36px; border-radius: 8px; background: #f4ecf5; color: #865588; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.pi .pi-canvas-card .pi-cc-ic.is-report { background: #4a7fd4; color: #fff; }
+.pi .pi-canvas-card .pi-cc-ic svg { width: 20px; height: 20px; }
+.pi .pi-cc-title { font-size: 15px; font-weight: 700; line-height: 20px; color: #1d1c1d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pi .pi-cc-sub { font-size: 13px; line-height: 18px; color: #616061; }
+.pi .pi-canvas-card > div:last-child { min-width: 0; }
+.pi .pi-saved { font-size: 13px; color: #616061; margin: 0 0 6px; }
+.pi .pi-link { color: #1264a3; }
+.pi .pi-src-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #616061; margin: 6px 0 2px; }
+.pi .pi-src-row svg { width: 10px; height: 10px; color: #1d1c1d; }
+
+/* flow result + monitor */
+.pi .pi-ok-line { display: flex; align-items: center; gap: 6px; font-weight: 700; margin: 0 0 8px; }
+.pi .pi-ok-line svg { width: 18px; height: 18px; color: #007a5a; }
+.pi .pi-checks { list-style: none; padding-left: 0 !important; margin: 0 0 8px !important; }
+.pi .pi-checks li { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 2px; }
+.pi .pi-checks li svg { width: 15px; height: 15px; color: #007a5a; flex: 0 0 auto; margin-top: 4px; }
+.pi .pi-muted { color: #616061; }
+.pi .pi-callout-green { background: #e3f8f0; color: #006147; font-weight: 700; border-radius: 6px; padding: 8px 10px; margin: 8px 0 6px; }
+.pi .pi-label-sm { font-size: 13px; font-weight: 700; color: #454447; margin: 6px 0 6px; }
+.pi .sk-sbpanel .sk-sb-rich blockquote.pi-quote { border-left: 4px solid #a350af; background: #f8f8f8; padding: 10px 12px; font-style: italic; border-radius: 0 6px 6px 0; }
+.pi .pi-agent-chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; margin: 0 0 8px; }
+.pi .pi-agent-chip span.pi-ic { width: 18px; height: 18px; border-radius: 50%; background: #a350af; color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+.pi .pi-agent-chip span.pi-ic svg { width: 11px; height: 11px; }
+.pi .pi-foot-note { font-size: 13px; color: #616061; margin: 4px 0 6px; }
+.pi .sk-mention-inline { color: #1264a3; background: #e8f4ff; border-radius: 3px; padding: 0 2px; }
+
+/* ---------- canvas view ---------- */
+.pi .pi-doc-head { height: 49px; flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 18px; box-shadow: inset 0 -1px 0 0 #dddbda; }
+.pi .pi-doc-head .pi-doc-title { font-size: 17px; font-weight: 700; color: #1d1c1d; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pi .pi-doc-head .pi-doc-meta { font-size: 13px; color: #616061; flex: 0 0 auto; }
+.pi .pi-doc-head .pi-hbtn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid #dddbda; border-radius: 6px; background: #fff; font: 700 13px/1 var(--sk-font); color: #1d1c1d; flex: 0 0 auto; }
+.pi .pi-doc-head .pi-hbtn svg { width: 15px; height: 15px; }
+.pi .pi-doc-head .sk-v2-hplain svg, .pi .pi-doc-head .pi-star svg { width: 18px; height: 18px; }
+.pi .pi-doc-head .pi-star { display: flex; color: #454447; }
+.pi .pi-doc-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.pi .pi-canvas { max-width: 640px; margin: 0 auto; padding: 28px 24px 60px; font-size: 15px; line-height: 22px; color: #1d1c1d; }
+.pi .pi-canvas .pi-gen { font-size: 13px; color: #616061; display: flex; align-items: center; gap: 4px; }
+.pi .pi-canvas .pi-gen svg { width: 13px; height: 13px; color: #a350af; }
+.pi .pi-canvas h1 { font-size: 28px; line-height: 36px; font-weight: 900; margin: 8px 0 2px; }
+.pi .pi-canvas .pi-byline { font-size: 13px; color: #616061; padding-bottom: 14px; border-bottom: 1px solid #dddbda; margin-bottom: 18px; }
+.pi .pi-canvas p { margin: 0 0 12px; }
+.pi .pi-canvas ul { margin: 0 0 12px; padding-left: 22px; }
+.pi .pi-canvas a, .pi .pi-canvas .pi-a { color: #1264a3; text-decoration: none; }
+.pi .pi-canvas .is-red { color: #c01343; }
+.pi .pi-canvas .is-green { color: #007a5a; }
+.pi .pi-canvas h2 { font-size: 18px; font-weight: 700; margin: 26px 0 12px; }
+.pi .pi-deal { border: 1px solid #dddbda; border-radius: 8px; padding: 14px 16px; margin: 0 0 14px; }
+.pi .pi-deal-top { display: flex; align-items: baseline; justify-content: space-between; }
+.pi .pi-deal-name { font-size: 17px; font-weight: 700; color: #1264a3; }
+.pi .pi-deal-amt { font-size: 15px; font-weight: 700; }
+.pi .pi-deal-meta { font-size: 13px; color: #616061; margin: 2px 0 8px; display: flex; gap: 22px; }
+.pi .pi-deal-meta b { color: #1d1c1d; }
+.pi .pi-deal-meta b.is-green { color: #007a5a; }
+.pi .pi-deal h3 { font-size: 13px; font-weight: 700; color: #454447; margin: 8px 0 2px; }
+.pi .pi-deal ul { margin: 0 0 6px; color: #454447; }
+.pi .pi-deal p { margin: 0 0 8px; }
+.pi .pi-flowbox { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px 16px; margin-top: 10px; }
+.pi .pi-flowbox h4 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+.pi .pi-flowbox .pi-fl { font-size: 13px; font-weight: 700; color: #454447; margin: 0 0 2px; }
+.pi .pi-flowbox ul { color: #454447; }
+.pi .pi-flowbox .sk-sb-action { margin-top: 6px; }
+
+/* ---------- Autonomous Insights report view ---------- */
+.pi .pi-report-scroll { background: #f8f8f8; }
+.pi .pi-report { max-width: 700px; margin: 0 auto; padding: 18px 20px 70px; }
+.pi .pi-icard { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 18px 20px; margin: 0 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.pi .pi-icard-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.pi .pi-icard-n { font: 13px/22px var(--sk-font); font-variant-numeric: tabular-nums; color: #616061; flex: 0 0 auto; }
+.pi .pi-icard-t { font-size: 15px; font-weight: 700; line-height: 22px; color: #1d1c1d; flex: 1 1 auto; }
+.pi .pi-sev { flex: 0 0 auto; font-size: 13px; font-weight: 700; line-height: 18px; padding: 1px 8px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+.pi .pi-sev.is-high { color: #c01343; background: #fff0f4; border-color: #f2b6c5; }
+.pi .pi-sev.is-med { color: #8d5300; background: #fef6e1; border-color: #efc66d; }
+.pi .pi-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.pi .pi-kpi { border: 1px solid #e8e8e8; border-radius: 8px; padding: 12px 14px; background: #f9f9f9; }
+.pi .pi-kpi-l { font-size: 13px; color: #454447; line-height: 18px; }
+.pi .pi-kpi-v { font-size: 22px; font-weight: 700; line-height: 30px; color: #1d1c1d; }
+.pi .pi-kpi-v.is-red { color: #c01343; }
+.pi .pi-kpi-s { font-size: 13px; color: #616061; line-height: 18px; min-height: 18px; }
+.pi .pi-ibul { margin: 0 0 12px; padding-left: 18px; font-size: 14px; line-height: 21px; color: #1d1c1d; list-style: square; }
+.pi .pi-ibul li { margin-bottom: 8px; }
+.pi .pi-ibul li::marker { color: #9a999b; font-size: 11px; }
+.pi .pi-rec { border-top: 1px solid #e8e8e8; padding-top: 12px; }
+.pi .pi-rec-h { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: #454447; margin-bottom: 6px; }
+.pi .pi-rec-h svg { width: 14px; height: 14px; }
+.pi .pi-rec div.pi-ra { display: flex; gap: 8px; font-size: 13px; line-height: 20px; color: #1d1c1d; }
+.pi .pi-rec div.pi-ra svg { width: 12px; height: 12px; margin-top: 4px; color: #616061; flex: 0 0 auto; }
+.pi .pi-report-foot { flex: 0 0 auto; height: 40px; display: flex; align-items: center; padding: 0 20px; border-top: 1px solid #dddbda; background: #fff; font-size: 13px; color: #616061; }
+
+/* Files sidebar */
+.pi .pi-files .sk-row-icon svg { width: 16px; height: 16px; }
+.pi .pi-files .sk-row.is-child { padding-left: 22px; }
+
+/* demo-flow: elements revealed later start hidden in scene pages */
+.pi [data-demo-hide] { display: none !important; }
+
+/* generator hooks */
+.pi .pi-gbtn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; margin-top: 6px; border: 0; border-radius: 6px; background: #007a5a; color: #fff; font: 700 14px/1 var(--sk-font); cursor: pointer; }
+.pi .pi-gbtn svg { width: 12px; height: 12px; }
+.pi .pi-ph { color: #616061; }
+.pi .pi-send-up.is-ready { color: #fff; background: #007a5a; border-radius: 6px; }
+.pi .sk-sbpanel .sk-composer-actions > .sk-icon-btn { flex: 0 0 auto; }
+.pi .sk-thread-count-divider .pi-cnt { white-space: nowrap; }
+.pi .pi-canvas .pi-deal ol { margin: 0 0 6px; padding-left: 22px; color: #454447; }
+.pi .pi-flowbox ol { margin: 0 0 8px; padding-left: 22px; color: #454447; }
+.pi a.pi-a:visited { color: #1264a3; }
+/* critic r1 fixes: "you" chip, DOC tile file card, muted section headings (capture 1) */
+.pi .pi-you { display: inline-block; margin: 0 2px 0 -2px; padding: 0 4px; border-radius: 3px; background: #f1f1f2; color: #616061; font-size: 11px; line-height: 16px; font-weight: 400; vertical-align: 1px; }
+.pi .pi-file { padding: 0 16px 0 0; gap: 14px; border-radius: 8px; overflow: hidden; max-width: 420px; }
+.pi .pi-doc { flex: 0 0 auto; display: grid; place-items: center; width: 60px; height: 56px; background: #3166dd; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .3px; }
+.pi .sk-section-heading { color: rgba(255,255,255,.72); font-size: 14px; }
+.pi .pi-crumb { color:#616061; font-size:12px; line-height:18px; margin:0 0 6px; }

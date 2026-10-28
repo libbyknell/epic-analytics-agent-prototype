@@ -1,0 +1,108 @@
+/* demo-ambient v1.1 (2026-10-06): Tier 2/3 ambient layer. Link AFTER demo-flow.css. See README.md "Ambient layer".
+ * Nothing in this file paints at rest: tooltips are [hidden], thumbs are [hidden]/opacity 0, the resize bar is hidden.
+ * Skin values come from BRK captures where sampled (see README evidence table); LOW-confidence ones are marked. */
+
+/* ---- stage safety: a two-finger horizontal swipe must never trigger browser back/forward */
+html, body { overscroll-behavior-x: none; }
+
+/* ---- reachable overflow: same box, same rest scroll, no native bar (no gutter, no reflow) */
+[data-amb-scroll] { scrollbar-width: none !important; overscroll-behavior: contain; }
+[data-amb-scroll]::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none; }
+[data-amb-scroll="x"] { overflow-x: auto !important; }
+[data-amb-scroll="y"] { overflow-y: auto !important; }
+[data-amb-scroll="both"], [data-amb-scroll=""] { overflow: auto !important; }
+
+.amb-layer { position: fixed; inset: 0; pointer-events: none; z-index: 2147482000; }
+.amb-thumb { position: fixed; border-radius: 4px; opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+.amb-thumb.amb-on { opacity: 1; pointer-events: auto; cursor: default; }
+.amb-thumb[hidden] { display: none; }
+/* mac overlay (Mac captures i-061, i-024): dark translucent, 6px, inset 2px */
+.amb-sb-mac { background: rgba(0, 0, 0, .45); border-radius: 3px; }
+/* Windows 11 Chromium Fluent (sampled i-031 / i-033): #8b8b8b thumb, 7px, fully rounded; shown on hover only */
+.amb-sb-fluent { background: #8b8b8b; border-radius: 4px; }
+/* Slack (i-024 mid-scroll #868686 over #f8f8f8; kit hover .15) */
+.amb-sb-slack { background: rgba(0, 0, 0, .45); border-radius: 3px; }
+.amb-sb-none { display: none !important; }
+/* iOS overlay bar (LOW: product knowledge): 3px, rgba(0,0,0,.35), shown only while scrolling, never hover/drag */
+.amb-sb-ios { background: rgba(0, 0, 0, .35); border-radius: 2px; }
+.amb-thumb.amb-sb-ios.amb-on { pointer-events: none; }
+/* ios on a natively scrolled box (data-amb-sb="ios" on the box itself): hide the native bar, the JS thumb replaces it */
+[data-amb-sb="ios"] { scrollbar-width: none; }
+[data-amb-sb="ios"]::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ---- tooltips: never take the pointer, never show while demo-flow animates */
+.amb-tip { position: fixed; left: 0; top: 0; pointer-events: none; max-width: 320px; white-space: nowrap; z-index: 1; }
+.amb-tip[hidden], body[data-demo-busy] .amb-tip { display: none !important; }
+.amb-tip b { font-weight: 700; }
+
+/* Tableau Cloud viz tooltip. LOW confidence (no capture): white, square, gray border, Field: **value** rows */
+.amb-tip-tableau {
+  background: #fff; border: 1px solid #d4d4d4; border-radius: 1px; box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+  padding: 6px 8px; font: 12px/1.4 var(--tbl-font, "Benton Sans", "Segoe UI", Arial, sans-serif); color: #333;
+}
+.amb-tip-tableau .amb-tip-v { color: #000; }
+.amb-tip-tableau .amb-tip-title { color: #000; font-weight: 700; }
+
+/* Tableau Pulse breakdown bar tooltip. MEDIUM (sampled plates/tableau/real/pulse-chart-detail.png): one line, below the bar */
+.amb-tip-pulse {
+  background: #fff; border: 1px solid #d9e3f2; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+  padding: 8px 12px; font: 13px/1.4 var(--tbl-font, "Segoe UI", Arial, sans-serif); color: #000; /* #000 sampled: plates/tableau/real/pulse-chart-detail.png */
+}
+.tbl-pulse-win .amb-tip-pulse { font-family: "Segoe UI", var(--tbl-font, Arial), sans-serif; }
+
+/* Tableau Next / Agentforce answer viz tooltip. LOW (no capture; SLDS-popover-like, no nubbin) */
+.amb-tip-tnext {
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+  padding: 8px 12px; font: 12px/1.5 var(--slds-g-font-family, "Salesforce Sans", -apple-system, "Segoe UI", Arial, sans-serif); color: #5c5c5c;
+}
+.amb-tip-tnext .amb-tip-v, .amb-tip-tnext .amb-tip-title { color: #181818; }
+.amb-tip-tnext .amb-tip-title { font-weight: 700; }
+
+/* SLDS 2 tooltip. MEDIUM-HIGH (sampled i-043 #032d60, i-031): navy, white 13px, radius 8, nubbin toward trigger */
+.amb-tip-slds {
+  background: #032d60; color: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+  padding: 8px 12px; font: 13px/1.4 var(--slds-g-font-family, "Salesforce Sans", -apple-system, "Segoe UI", Arial, sans-serif); white-space: normal;
+}
+/* Slack tooltip. LOW-MEDIUM (product knowledge): near-black, bold white 13px, radius 6 */
+.amb-tip-slack {
+  background: #1d1c1d; color: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+  padding: 6px 10px; font: 700 13px/1.38 "Slack-Lato", "Lato", -apple-system, "Segoe UI", Arial, sans-serif;
+}
+.amb-nub::before {
+  content: ""; position: absolute; left: var(--amb-nub-x, 50%); width: 10px; height: 10px; margin-left: -5px;
+  background: inherit; transform: rotate(45deg); border-radius: 1px;
+}
+.amb-nub[data-side="below"]::before { top: -4px; }
+.amb-nub[data-side="above"]::before { bottom: -4px; }
+
+/* mark hover. Evidence: no product dims sibling marks on hover (Tableau dims only on SELECT = story-changing,
+   Tier 3). So the default is cursor only. data-amb-hot is set on the hovered mark for page-specific CSS. */
+[data-tip-skin="tnext"] [data-tip], [data-tip-skin="pulse"] [data-tip], [data-tip][data-tip-skin="tnext"] { cursor: pointer; }
+
+/* ---- hover utilities for Tier 2c/3 (colors sampled: SLDS/Next row #f3f3f3 i-063/i-038; Slack message #f8f8f8 i-024) */
+[data-amb-hover] { cursor: pointer; }
+[data-amb-hover="row"]:hover { background: var(--amb-row-hover, #f3f3f3); }
+[data-tip-skin="slack"] [data-amb-hover="row"]:hover, [data-amb-hover="row"][data-tip-skin="slack"]:hover { background: var(--amb-row-hover, #f8f8f8); }
+[data-amb-hover="ul"]:hover { text-decoration: underline !important; }       /* !important: pasted chrome has inline text-decoration:none */
+/* the radius lives inside :hover, so the at-rest box (and an <svg> clip) is untouched */
+[data-amb-hover="icon"]:hover { border-radius: 4px; background: var(--amb-icon-hover, rgba(0, 0, 0, .06)); }
+[data-amb-hover="tint"]:hover { filter: brightness(.97); }
+[data-amb-toggle], [data-amb-inert] { cursor: pointer; }
+/* a block-level header would make the whole row the hit target; opt out with data-amb-full. :where() = zero specificity */
+:where([data-amb-toggle]:is(div):not([data-amb-full])) { width: max-content; }
+/* tier-3 chrome the JS catches: bare <a> and titled icon spans in header/nav/banner regions */
+:is(header, nav, [role=banner], [data-amb-chrome]) :is(a:not([href]), span[title]:has(svg, img)) { cursor: pointer; }
+
+/* Pulse line scrub (only series marked data-amb-series="captured"): rule + dot, shown while scrubbing */
+.amb-scrub-rule { position: fixed; width: 1px; background: rgba(0, 0, 0, .25); pointer-events: none; margin-left: -.5px; }
+.amb-scrub-dot { position: fixed; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 0 2px #fff; pointer-events: none; }
+.amb-scrub-rule[hidden], .amb-scrub-dot[hidden], body[data-demo-busy] .amb-scrub-rule, body[data-demo-busy] .amb-scrub-dot { display: none !important; }
+
+/* Tier 3 press feedback (no transform: never shifts layout or pixels around it) */
+.amb-press { filter: brightness(.9) !important; transition: filter .08s; }
+
+/* ---- resize (evidence-gated): invisible 8px hit zone on the edge, 3px accent bar only on hover/drag */
+html.amb-col, html.amb-col * { cursor: col-resize !important; }
+html.amb-dragging { user-select: none; }
+.amb-resize-bar { position: fixed; width: 3px; background: var(--amb-resize-accent, #0250d9); pointer-events: none; }
+.amb-resize-bar[hidden] { display: none; }

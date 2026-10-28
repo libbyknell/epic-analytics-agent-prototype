@@ -1,0 +1,1125 @@
+/* ============================================================================
+   CANONICAL SLACK DESKTOP SHELL
+   Paste this in; do not re-derive Slack chrome from tokens each time.
+
+   Provenance: geometry/colors/type are measurements re-expressed from the real
+   Slack Proto Kit (git.soma scg-design-engineering/slack.git, commit c9bebee8,
+   React 19 + Vite, CSS generated from Slack's own `slack/design-tokens` repo —
+   read-only clone at ~/Documents/Apps Prototype/reference-kits/slack-proto-kit/).
+   Cross-reference: ../../tokens/slack.css `--dtk-*` block, ../slack.md "Slack
+   Proto Kit (authoritative)" section. This file is self-contained (own :root,
+   like lex-shell.css) so it works even if tokens/slack.css isn't linked — the
+   --sk-* values below are set to literally match the --dtk-* values there.
+
+   Still proprietary Slack IP: these are measurements/geometry re-expressed as
+   our own tokens and our own markup, not Slack's shipped CSS/JS/icons/fonts.
+   Icons below are redrawn inline from Slack's PUBLIC-API-surfaced icon shapes
+   (same visual vocabulary third-party Slack apps see), not copied binary
+   assets. Font is Lato (self-hosted, OFL-licensed, see assets/fonts/) — Slack
+   itself layers 'Slack-Lato'/'Slack-Fractions' on top of Lato; we ship base
+   Lato only. Avatars/app icons in assets/ are the Slack Proto Kit's own
+   placeholder art (not real employee photos or real third-party trademarks),
+   used here for internal prototype realism only. Internal use only.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Lato';
+  src: url('assets/fonts/lato-regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('assets/fonts/lato-italic.woff2') format('woff2');
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('assets/fonts/lato-bold.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('assets/fonts/lato-black.woff2') format('woff2');
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* ---- font ---- */
+  --sk-font: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --sk-fs-micro: 12px; --sk-fs-caption: 13px; --sk-fs-base: 15px;
+  --sk-fs-subtitle: 18px; --sk-fs-title: 22px; --sk-fs-headline: 28px;
+
+  /* ---- colors (== tokens/slack.css --dtk-*) ---- */
+  --sk-aubergine-100: #39063a;  /* rail — deeper purple */
+  --sk-aubergine-90:  #4a154b;  /* sidebar — real Slack purple */
+  --sk-aubergine-80:  #611f69;  /* hover-on-dark accents */
+  --sk-aubergine-0:   #f9edff;  /* active channel-row pill bg (light!) */
+  --sk-aubergine-0-text: #4a154b; /* active channel-row text, same as sidebar bg */
+  --sk-green:        #007a5a;
+  --sk-green-bg:      #007a5a1a;
+  --sk-green-active:  #178f65;  /* send button active/pressed */
+  --sk-text:          #1d1c1d;
+  --sk-text-sec:      #454447;
+  --sk-text-ter:      #5e5d60;
+  --sk-text-muted:    #77757a;  /* == tokens/slack.css --sl-text-muted (textMuted/timestamps) */
+  --sk-link:          #1264a3;
+  --sk-surface:       #ffffff;
+  --sk-surface-alt:   #f8f8f8;
+  --sk-otl-pry:       #7c7a7f;
+  --sk-otl-sec:       #5e5d6073;
+  --sk-otl-ter:       #5e5d6021;
+  --sk-danger:        #e01e5a;
+  --sk-flamingo-60:   #e01e5a;   /* APP badge bg */
+  --sk-ai-accent:     #a350af;   /* AI-generated-content sparkle marker; == old tokens/slack.css --sl-purple-accent */
+  --sk-sidebar-text:        rgba(255,255,255,.78);
+  --sk-sidebar-text-muted:  rgba(255,255,255,.56);
+  --sk-sidebar-hover:       rgba(255,255,255,.3);
+  --sk-sidebar-active-icon: rgba(0,0,0,.08);
+
+  /* ---- geometry (== tokens/slack.css --dtk-*) ---- */
+  --sk-rail-w: 70px;
+  --sk-sidebar-w: 270px;
+  --sk-topnav-h: 40px;
+  --sk-header-h: 49px;
+  --sk-header-pad: 0 12px 0 18px;
+  --sk-tabbar-h: 38px;
+  --sk-avatar: 36px;
+  --sk-msg-pad: 8px 20px;
+  --sk-msg-gutter-gap: 8px;
+  --sk-composer-radius: 12px;
+  --sk-composer-input-pad: 9px 12px 7px 12px;
+  --sk-composer-actionbar-h: 40px;
+  --sk-composer-icon-btn: 28px;
+  --sk-send-h: 28px;
+  --sk-account-switch-btn: 36px;
+
+  /* ---- spacing / radius scale ---- */
+  --sk-space-025: 4px; --sk-space-050: 8px; --sk-space-075: 12px; --sk-space-100: 16px;
+  --sk-radius-small: 2px; --sk-radius-base: 4px; --sk-radius-large: 8px;
+  --sk-radius-xlarge: 12px; --sk-radius-rounded: 9999px;
+}
+
+/* =========================================================================
+   Button reset — scoped with :where() so its specificity stays at the bare
+   element level (0,0,1), lower than every single-class component rule below
+   (.sk-icon-btn, .sk-fmt-btn, etc. are 0,1,0) regardless of source order.
+   Without this, browsers' default <button> UA style (buttonface background +
+   outset border) combines with `border-radius: 50%` on icon buttons to render
+   a visible bordered-circle around every composer/toolbar icon — not a real
+   Slack look. Real Slack's icon buttons are bare glyphs with no visible
+   border/background until hover. Scoped to .sk-window so pasting this file
+   into a host page never resets buttons outside the Slack shell.
+   ========================================================================= */
+:where(.sk-window) button {
+  margin: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: inherit; text-align: inherit;
+  cursor: pointer; -webkit-appearance: none; appearance: none;
+  box-sizing: border-box;
+}
+:where(.sk-window) button:focus { outline: none; }
+
+/* =========================================================================
+   macOS window frame — every plate in plates/slack/real/* shows the app in a
+   native macOS window (traffic lights, no browser chrome). Wrap the shell in
+   .sk-window so screenshots read as the desktop app, not a browser tab.
+   ========================================================================= */
+.sk-window {
+  font-family: var(--sk-font);
+  color: var(--sk-text);
+  background: var(--sk-surface);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+/* Traffic lights live inside .sk-topnav-history now (see .sk-topnav below) —
+   real desktop Slack has no separate bold-title strip; the window controls
+   sit on the same row as back/forward/history/search. There is no
+   .sk-titlebar element anymore. */
+.sk-traffic {
+  display: flex;
+  gap: 8px;
+  padding-right: 6px;
+  margin-right: 2px;
+  border-right: 1px solid rgba(255,255,255,.15);
+}
+.sk-traffic span {
+  width: 12px; height: 12px; border-radius: 50%;
+  display: inline-block;
+}
+.sk-traffic .is-close { background: #ff5f57; }
+.sk-traffic .is-min   { background: #febc2e; }
+.sk-traffic .is-zoom  { background: #28c840; }
+
+/* =========================================================================
+   App body = topnav (full width) above rail + sidebar + main (+ optional
+   thread pane). Real Slack: top-nav spans the whole window; the icon rail
+   and sidebar sit below it, side by side with the message pane.
+   ========================================================================= */
+.sk-app {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--sk-surface);
+}
+.sk-body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---- top nav (40px, full width) ----
+   back/forward/history LEFT · search CENTERED · AI/help RIGHT.
+   No workspace name here — that lives in the sidebar header dropdown. */
+.sk-topnav {
+  height: var(--sk-topnav-h);
+  flex: 0 0 auto;
+  background: var(--sk-aubergine-90);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+.sk-topnav-history {
+  flex: 0 0 346px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sk-topnav-btn {
+  width: 28px; height: 28px;
+  border-radius: var(--sk-radius-base);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.7);
+  background: transparent;
+  border: 0;
+  flex: 0 0 auto;
+}
+.sk-topnav-btn svg { width: 18px; height: 18px; }
+.sk-topnav-btn.is-disabled { color: rgba(255,255,255,.3); }
+.sk-topnav-search {
+  flex: 2 1 0;
+  min-width: 280px; max-width: 732px;
+  margin: 0 auto;
+  height: 28px;
+  border-radius: var(--sk-radius-base);
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px;
+  color: rgba(255,255,255,.9);
+  font-size: var(--sk-fs-caption);
+}
+.sk-topnav-search svg { width: 16px; height: 16px; flex: 0 0 auto; opacity: .85; }
+.sk-topnav-right {
+  flex: 0 0 346px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+/* ---- icon rail (70px, vertical) ---- */
+.sk-rail {
+  width: var(--sk-rail-w);
+  flex: 0 0 auto;
+  background: var(--sk-aubergine-100);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 8px;
+  gap: 2px;
+}
+.sk-account-switch {
+  position: relative;
+  width: var(--sk-account-switch-btn); height: var(--sk-account-switch-btn);
+  border-radius: var(--sk-radius-base);
+  margin-bottom: 14px;
+  flex: 0 0 auto;
+}
+.sk-account-switch img {
+  width: 100%; height: 100%; border-radius: var(--sk-radius-base);
+  display: block; position: relative; z-index: 2;
+}
+/* Workspace icon — a flat-color square + initial letter, matching real Slack's
+   own default-icon convention for an uncustomized workspace (confirmed against
+   plates/slack/real/channel-thread-full-desktop-view.jpg, which shows a plain
+   purple square + lowercase "a" for its workspace). Do NOT put Slack's own
+   product logo here — that's the single most-recognized "fake chrome" tell a
+   daily Slack user catches first (see chrome/slack-shell/README.md). */
+.sk-workspace-icon {
+  width: 100%; height: 100%; border-radius: var(--sk-radius-base);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 2;
+  background: var(--sk-link);
+  color: #fff;
+  font-weight: 900;
+  font-size: 17px;
+}
+.sk-account-switch .sk-phantom {
+  position: absolute; inset: 0;
+  border-radius: var(--sk-radius-base);
+  background: var(--sk-aubergine-80);
+  z-index: 1;
+}
+.sk-account-switch .sk-phantom:nth-child(1) { transform: translate(3px,3px); opacity: .55; }
+.sk-rail-tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%;
+}
+.sk-rail-tab {
+  width: 52px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 4px 0 5px;
+  border-radius: var(--sk-radius-base);
+  color: var(--sk-sidebar-text);
+  position: relative;
+}
+.sk-rail-tab-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--sk-radius-base);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.sk-rail-tab-icon svg { width: 20px; height: 20px; }
+.sk-rail-tab.is-active .sk-rail-tab-icon { background: var(--sk-sidebar-active-icon); color: #fff; }
+.sk-rail-tab.is-active { color: #fff; }
+.sk-rail-tab:not(.is-active):hover .sk-rail-tab-icon { background: rgba(255,255,255,.08); }
+.sk-rail-tab-label { font-size: 11px; font-weight: 700; line-height: 13px; }
+.sk-rail-badge {
+  position: absolute; top: 1px; right: 6px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: var(--sk-radius-rounded);
+  background: var(--sk-danger); color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.sk-rail-dot {
+  position: absolute; top: 3px; right: 10px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sk-danger);
+  box-shadow: 0 0 0 2px var(--sk-aubergine-100);
+}
+.sk-rail-spacer { flex: 1 1 auto; }
+.sk-rail-controls {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin-top: auto;
+}
+.sk-rail-create {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--sk-aubergine-80);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.sk-rail-create svg { width: 18px; height: 18px; }
+.sk-rail-user {
+  position: relative;
+  width: 36px; height: 36px; border-radius: var(--sk-radius-base);
+  overflow: visible;
+}
+.sk-rail-user img { width: 100%; height: 100%; border-radius: var(--sk-radius-base); display: block; }
+.sk-rail-user .sk-presence {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--sk-aubergine-100);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px var(--sk-aubergine-100);
+}
+.sk-rail-user .sk-presence svg { width: 10px; height: 10px; color: var(--sk-green-active); }
+
+/* ---- channel sidebar (270px) ---- */
+.sk-sidebar {
+  width: var(--sk-sidebar-w);
+  flex: 0 0 auto;
+  background: var(--sk-aubergine-90);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sk-sidebar-header {
+  height: var(--sk-header-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 16px;
+}
+.sk-sidebar-ws {
+  display: flex; align-items: center; gap: 4px;
+  color: #fff; font-size: var(--sk-fs-subtitle); font-weight: 900;
+  border: 0; background: transparent;
+  max-width: 190px;
+}
+.sk-sidebar-ws span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-sidebar-ws svg { width: 16px; height: 16px; flex: 0 0 auto; opacity: .8; }
+.sk-sidebar-header-actions { display: flex; gap: 2px; }
+.sk-sidebar-icon-btn {
+  width: 28px; height: 28px; border-radius: var(--sk-radius-base);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sk-sidebar-text);
+  background: transparent; border: 0;
+}
+.sk-sidebar-icon-btn svg { width: 18px; height: 18px; }
+.sk-sidebar-icon-btn:hover { background: var(--sk-sidebar-hover); }
+
+/* Pinned nav rows directly under the workspace header (Threads / Drafts & sent /
+   Directories) — reuses .sk-row below. Real Slack has no secondary "find a
+   conversation" search box here; global search lives in the top-nav only. */
+.sk-sidebar-pinned { flex: 0 0 auto; margin-bottom: 4px; }
+
+.sk-sidebar-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.sk-sidebar-section { margin-bottom: 2px; }
+.sk-section-heading {
+  display: flex; align-items: center; gap: 6px;
+  height: 28px;
+  padding: 0 8px 0 16px;
+  margin: 4px 0 2px;
+  color: var(--sk-sidebar-text-muted);
+  font-size: var(--sk-fs-caption); font-weight: 700;
+}
+.sk-section-heading svg { width: 12px; height: 12px; flex: 0 0 auto; }
+.sk-section-heading .sk-section-label { flex: 1 1 auto; }
+
+.sk-row {
+  display: flex; align-items: center; gap: 8px;
+  height: 28px;
+  padding: 0 8px 0 24px;
+  margin: 0 8px;
+  border-radius: var(--sk-radius-base);
+  color: var(--sk-sidebar-text);
+  font-size: var(--sk-fs-base);
+  position: relative;
+}
+.sk-row:hover { background: var(--sk-sidebar-hover); }
+.sk-row.is-active {
+  background: var(--sk-aubergine-0);
+  color: var(--sk-aubergine-0-text);
+  font-weight: 700;
+}
+.sk-row.is-active svg { color: var(--sk-aubergine-0-text); }
+.sk-row-icon { width: 16px; height: 16px; flex: 0 0 auto; opacity: .85; }
+.sk-row-icon svg { width: 100%; height: 100%; }
+.sk-row-label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-row.has-unread .sk-row-label { color: #fff; font-weight: 700; }
+.sk-row.is-active.has-unread .sk-row-label { color: var(--sk-aubergine-0-text); }
+.sk-row-badge {
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: var(--sk-radius-rounded);
+  background: var(--sk-danger); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.sk-row-dm-avatar { width: 20px; height: 20px; border-radius: var(--sk-radius-small); flex: 0 0 auto; }
+.sk-row-presence {
+  position: absolute; left: 24px; bottom: 3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sk-green-active);
+  box-shadow: 0 0 0 2px var(--sk-aubergine-90);
+}
+.sk-row.is-disabled { opacity: .5; }
+
+/* =========================================================================
+   Main column: view-header + channel-tab-bar + message pane + composer
+   ========================================================================= */
+.sk-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--sk-surface);
+  border-left: 1px solid var(--sk-otl-ter);
+}
+
+.sk-view-header {
+  height: var(--sk-header-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sk-header-pad);
+  box-shadow: inset 0 -1px 0 0 var(--sk-otl-ter);
+}
+.sk-view-header.no-border { box-shadow: none; }
+.sk-view-header-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--sk-fs-subtitle); font-weight: 900;
+  color: var(--sk-text);
+  min-width: 0;
+}
+.sk-view-header-title svg { width: 18px; height: 18px; color: var(--sk-text-ter); flex: 0 0 auto; }
+/* Channel-name dropdown chevron — real Slack always pairs the channel title
+   with a chevron that opens the channel-details menu (confirmed against
+   channel-thread-full-desktop-view.jpg's "# project-welo ⌄"). Smaller than
+   the leading hash glyph, so it gets its own size rather than inheriting
+   the 18px rule above. */
+.sk-view-header-chevron { width: 14px !important; height: 14px !important; margin-left: 1px; }
+.sk-view-header-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-view-header-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.sk-vh-btn {
+  height: 28px; padding: 0 8px;
+  border-radius: var(--sk-radius-base);
+  /* Real Slack draws a thin pill border around the member-count and Huddle
+     controls (confirmed against channel-thread-full-desktop-view.jpg); the
+     bare "More" kebab stays borderless, see .icon-only below. */
+  border: 1px solid var(--sk-otl-ter); background: transparent;
+  display: flex; align-items: center; gap: 6px;
+  color: var(--sk-text-ter);
+  font-size: var(--sk-fs-caption); font-weight: 700;
+}
+.sk-vh-btn:hover { background: var(--sk-surface-alt); }
+.sk-vh-btn svg { width: 18px; height: 18px; }
+.sk-vh-btn.icon-only { width: 28px; padding: 0; justify-content: center; border: 0; }
+.sk-vh-btn.icon-only svg { width: 16px; height: 16px; }
+/* Huddle control: headset icon + dropdown chevron in one pill, no text label
+   (real Slack has none at this header width — see shell.html comment).
+   Targeted structurally (not by class) — see fidelity-gate's shell-provenance
+   note below for why: a classed <svg> trips the gate's region-drift check. */
+.sk-vh-huddle { gap: 4px; }
+.sk-vh-huddle svg:last-child { width: 12px !important; height: 12px !important; color: var(--sk-text-ter); }
+.sk-vh-avatars { display: flex; margin-right: 2px; }
+.sk-vh-avatars img {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--sk-surface);
+  margin-left: -6px;
+}
+.sk-vh-avatars img:first-child { margin-left: 0; }
+
+/* ---- channel tab bar (38px) ----
+   Optional: add class "no-tabbar" to the parent .sk-main to drop the whole
+   bar for a beat that doesn't need it (narrower thread budget, simpler
+   screen) instead of deleting the markup block. Pins/Bookmarks
+   (`[data-tab="optional"]` in shell.html) are the two tabs to drop first if
+   a beat needs the bar but is tight on width; Messages/Canvas/More/+ are
+   the required minimum real Slack always shows. */
+.sk-main.no-tabbar .sk-tabbar { display: none; }
+.sk-tabbar {
+  height: var(--sk-tabbar-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  padding: 0 8px;
+  box-shadow: inset 0 -1px 0 0 var(--sk-otl-ter);
+  gap: 2px;
+}
+.sk-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 10px;
+  font-size: var(--sk-fs-caption); font-weight: 400;
+  color: var(--sk-text-ter);
+  position: relative;
+}
+.sk-tab svg { width: 16px; height: 16px; }
+/* Only the active tab is bold in real Slack (channel-thread-full-desktop-view.jpg,
+   measured: "Messages" cap-height ~12px/bold vs "Canvas"/"Pins"/"Bookmarks" ~9px/regular) —
+   inactive tabs stay font-weight 400 above; is-active is the only bold one. */
+.sk-tab.is-active { color: var(--sk-text); font-weight: 700; box-shadow: inset 0 -2px 0 0 var(--sk-aubergine-90); }
+.sk-tab:hover:not(.is-active) { color: var(--sk-text); }
+.sk-tab-more {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 10px; margin-left: 2px;
+  font-size: var(--sk-fs-caption); font-weight: 400;
+  color: var(--sk-text-ter);
+}
+.sk-tab-more svg { width: 14px; height: 14px; }
+/* "+" sits inline right after More with a normal tab-gap (plate) — previously
+   margin-left:auto pushed it to the far right edge of the bar. */
+.sk-tabbar-add {
+  margin-left: 2px;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px;
+  color: var(--sk-text-ter);
+}
+.sk-tabbar-add svg { width: 16px; height: 16px; }
+
+/* =========================================================================
+   Message pane
+   ========================================================================= */
+.sk-pane {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+.sk-channel-col { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.sk-messages {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.sk-date-divider {
+  display: flex; align-items: center; gap: 8px;
+  margin: 8px 20px 10px;
+}
+.sk-date-divider::before, .sk-date-divider::after {
+  content: ''; flex: 1 1 auto; height: 1px; background: var(--sk-otl-ter);
+}
+.sk-date-divider span {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 700; color: var(--sk-text);
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-otl-ter);
+  border-radius: var(--sk-radius-rounded);
+  padding: 2px 10px;
+}
+/* Real Slack's date-divider pill is a jump-to-date dropdown — carries a
+   chevron on every divider, not just "Today" (channel-thread-full-desktop-
+   view.jpg shows this on its "Today" pill). */
+.sk-date-divider span svg { width: 12px; height: 12px; color: var(--sk-text-ter); }
+
+.sk-msg {
+  display: flex;
+  gap: var(--sk-msg-gutter-gap);
+  padding: var(--sk-msg-pad);
+  position: relative;
+}
+.sk-msg:hover, .sk-msg.is-hover-demo { background: var(--sk-surface-alt); }
+.sk-msg-gutter { width: var(--sk-avatar); flex: 0 0 auto; }
+.sk-msg-avatar { width: var(--sk-avatar); height: var(--sk-avatar); border-radius: var(--sk-radius-large); display: block; }
+.sk-msg-avatar--initials {
+  width: var(--sk-avatar); height: var(--sk-avatar); border-radius: var(--sk-radius-large);
+  display: flex; align-items: center; justify-content: center;
+  /* dry run #3 friction (S1 #1): was a bespoke #9b6a97 that isn't in tokens/slack.css
+     and has no match in the vendored Slack Proto Kit's own aubergine palette
+     (nearest ramp step, aubergine-60 #a350af, is still ΔE too far) — guaranteed
+     color-palette FAIL for every builder who used this shell-blessed class as-is.
+     Switched to this file's own --sk-aubergine-80 (#611f69 == tokens/slack.css's
+     --dtk-aubergine-80), the same on-palette token the S1 builder's own page-level
+     override already used — no new color, just using one already defined above. */
+  background: var(--sk-aubergine-80); color: #fff; font-weight: 700; font-size: 14px;
+}
+.sk-msg-gutter-time {
+  flex: 0 0 auto; /* never shrink, or grouped long messages indent-mismatch */
+  width: var(--sk-avatar); text-align: right;
+  font-size: 11px; color: var(--sk-text-ter);
+  opacity: 0; padding-top: 3px;
+}
+.sk-msg.is-grouped:hover .sk-msg-gutter-time { opacity: 1; }
+.sk-msg-content { flex: 1 1 auto; min-width: 0; }
+.sk-msg-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
+.sk-msg-sender { font-weight: 700; font-size: var(--sk-fs-base); color: var(--sk-text); }
+.sk-msg-time { font-size: 12px; color: var(--sk-text-muted); }
+/* Muted grey outline chip, not a saturated brand-color fill — real Slack's
+   "APP" tag next to a bot/app sender name is a quiet grey label, not a
+   colored badge (confirmed against all three real plates: none render it as
+   a solid-fill tag). --sk-flamingo-60 kept defined above for other uses, no
+   longer referenced here. */
+.sk-app-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--sk-surface-alt); color: var(--sk-text-muted);
+  border: 1px solid var(--sk-otl-ter);
+  font-size: 10px; font-weight: 700; letter-spacing: .2px;
+  border-radius: var(--sk-radius-small);
+  padding: 0 4px;
+}
+/* AI-generated-content marker — real Slack marks AI features with a consistent purple
+   sparkle glyph everywhere (Recap nav icon, AI-answer badge, Canvas "Write with AI").
+   --sk-ai-accent == old tokens/slack.css --sl-purple-accent #a350af ("Agentforce/AI
+   accent bar + tags"), reused here rather than inventing a new color. Put this NEXT TO
+   the sender name on any message authored by an agent (Agentforce, IT Specialist Agent,
+   Slackbot when it's answering with AI vs. a canned system message) — not a replacement
+   for .sk-app-badge, which marks "this is an app/bot", a different fact than "this
+   content is AI-generated". */
+.sk-ai-sparkle { color: var(--sk-ai-accent); width: 13px; height: 13px; flex: 0 0 auto; }
+.sk-msg-body { font-size: var(--sk-fs-base); line-height: 22px; color: var(--sk-text); white-space: pre-wrap; }
+.sk-msg-body .sk-mention {
+  color: var(--sk-link); background: #e8f4ff; border-radius: var(--sk-radius-small);
+  padding: 0 2px; font-weight: 700;
+}
+
+.sk-msg-toolbar {
+  position: absolute; top: -16px; right: 16px;
+  display: none;
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-otl-ter);
+  border-radius: var(--sk-radius-base);
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  padding: 2px;
+  gap: 2px;
+}
+.sk-msg:hover .sk-msg-toolbar, .sk-msg.is-hover-demo .sk-msg-toolbar { display: flex; }
+.sk-toolbar-btn {
+  width: 26px; height: 26px; border-radius: var(--sk-radius-small);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sk-text-ter);
+}
+.sk-toolbar-btn svg { width: 16px; height: 16px; }
+.sk-toolbar-btn:hover { background: var(--sk-surface-alt); color: var(--sk-text); }
+
+/* ---- reactions ---- */
+.sk-reactions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.sk-reaction {
+  display: flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 8px;
+  border-radius: var(--sk-radius-rounded);
+  border: 1px solid var(--sk-otl-sec);
+  background: var(--sk-surface);
+  font-size: 13px; font-weight: 700; color: var(--sk-text-sec);
+}
+.sk-reaction.is-mine { background: var(--sk-green-bg); border-color: var(--sk-green); color: var(--sk-green); }
+.sk-reaction-emoji { font-size: 14px; }
+.sk-reaction-add {
+  width: 24px; height: 24px; border-radius: var(--sk-radius-rounded);
+  border: 1px solid var(--sk-otl-sec);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sk-text-ter);
+}
+.sk-reaction-add svg { width: 14px; height: 14px; }
+
+/* ---- thread replies row ---- */
+.sk-thread-replies {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 6px; height: 28px;
+  cursor: pointer;
+}
+.sk-thread-avatars { display: flex; }
+.sk-thread-avatars img {
+  width: 24px; height: 24px; border-radius: var(--sk-radius-base);
+  border: 2px solid var(--sk-surface);
+  margin-left: -6px;
+}
+.sk-thread-avatars img:first-child { margin-left: 0; }
+.sk-thread-count { font-size: 13px; font-weight: 700; color: var(--sk-link); }
+.sk-thread-latest { font-size: 13px; color: var(--sk-text-muted); }
+.sk-thread-replies:hover .sk-thread-count { text-decoration: underline; }
+
+/* ---- typing / streaming indicator ---- */
+.sk-typing { display: flex; align-items: center; gap: 8px; padding: 6px 20px 10px; }
+.sk-typing-dots { display: flex; gap: 3px; align-items: center; }
+.sk-typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sk-text-ter);
+  animation: sk-typing-bounce 1.1s infinite ease-in-out;
+}
+.sk-typing-dots span:nth-child(2) { animation-delay: .15s; }
+.sk-typing-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes sk-typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-3px); opacity: 1; } }
+.sk-typing-label { font-size: 13px; color: var(--sk-text-muted); font-style: italic; }
+
+/* =========================================================================
+   Block Kit — flat, no wrapper box, no accent bar. Confirmed against real
+   section/header/context/actions/divider block CSS: none of them have a
+   border, background, or left color bar on their root. The ONLY visual
+   affordance for "this came from an app" is the author row (app icon + name
+   + APP badge) above the blocks, same as any other message.
+   ========================================================================= */
+.sk-blocks { display: flex; flex-direction: column; gap: var(--sk-space-075); margin-top: 2px; }
+.sk-block-header { font-size: var(--sk-fs-subtitle); font-weight: 900; line-height: 24px; color: var(--sk-text); }
+.sk-block-section { display: flex; gap: 12px; align-items: flex-start; }
+.sk-block-section-text { flex: 1 1 auto; font-size: var(--sk-fs-base); line-height: 22px; color: var(--sk-text); }
+.sk-block-fields {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+  margin-top: 6px; font-size: var(--sk-fs-caption); line-height: 18px;
+}
+.sk-block-fields b { font-weight: 700; }
+.sk-block-accessory { flex: 0 0 auto; }
+.sk-block-context {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: var(--sk-fs-micro); color: var(--sk-text-ter);
+}
+.sk-block-context img, .sk-block-context svg { width: 16px; height: 16px; border-radius: var(--sk-radius-small); }
+.sk-block-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.sk-block-btn {
+  height: 30px; padding: 0 12px;
+  border-radius: var(--sk-radius-base);
+  border: 1px solid var(--sk-otl-sec);
+  background: var(--sk-surface);
+  font-size: 14px; font-weight: 600; color: var(--sk-text);
+}
+/* Block Kit style:primary is FILLED green with white text (not outlined). */
+.sk-block-btn--primary { background: #007a5a; border-color: #007a5a; color: #fff; }
+.sk-block-btn--primary:hover { background: #148567; border-color: #148567; }
+.sk-block-btn--danger { border-color: var(--sk-danger); color: var(--sk-danger); }
+.sk-block-divider { height: 1px; background: var(--sk-otl-ter); border: 0; margin: 2px 0; }
+.sk-block-image { max-width: 360px; border-radius: var(--sk-radius-base); display: block; }
+
+/* =========================================================================
+   Composer
+   ========================================================================= */
+.sk-composer-wrap { flex: 0 0 auto; padding: 0 20px 16px; }
+.sk-composer {
+  border: 1px solid var(--sk-otl-sec);
+  border-radius: var(--sk-composer-radius);
+  background: var(--sk-surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  display: flex;
+  flex-direction: column;
+}
+/* Hidden by default — real Slack's text-formatting toolbar only appears once
+   the "Aa" button is toggled or text is selected; it is not visible in the
+   channel composer's resting state (plates/slack/real/channel-thread-full-
+   desktop-view.jpg shows only the bare icon row, no toolbar strip above it).
+   Add .is-open to show it (not wired to a click handler here — static shell). */
+.sk-composer-format {
+  display: none; align-items: center; gap: 2px;
+  height: 36px; padding: 0 6px;
+  background: var(--sk-surface-alt);
+  border-radius: var(--sk-composer-radius) var(--sk-composer-radius) 0 0;
+  box-shadow: inset 0 -1px 0 0 var(--sk-otl-ter);
+}
+.sk-composer-format.is-open { display: flex; }
+.sk-fmt-btn {
+  width: 26px; height: 26px; border-radius: var(--sk-radius-small);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sk-text-ter);
+}
+.sk-fmt-btn svg { width: 15px; height: 15px; }
+.sk-fmt-btn:hover { background: rgba(0,0,0,.06); color: var(--sk-text); }
+.sk-fmt-divider { width: 1px; height: 18px; background: var(--sk-otl-ter); margin: 0 4px; }
+
+.sk-composer-input {
+  padding: var(--sk-composer-input-pad);
+  font-size: var(--sk-fs-base); line-height: 22px;
+  color: var(--sk-text);
+  min-height: 22px;
+}
+.sk-composer-input:empty::before {
+  content: attr(data-placeholder);
+  color: var(--sk-text-ter);
+}
+.sk-composer-input .sk-mention {
+  display: inline-flex; align-items: center;
+  color: var(--sk-link); background: #e8f4ff; border-radius: var(--sk-radius-small);
+  padding: 0 3px; font-weight: 700;
+}
+
+.sk-composer-actions {
+  height: var(--sk-composer-actionbar-h);
+  display: flex; align-items: center;
+  padding: 0 6px;
+}
+.sk-composer-actions-left { display: flex; align-items: center; gap: 2px; flex: 1 1 auto; }
+.sk-icon-btn {
+  width: var(--sk-composer-icon-btn); height: var(--sk-composer-icon-btn);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sk-text-ter);
+}
+.sk-icon-btn svg { width: 18px; height: 18px; }
+.sk-icon-btn:hover { background: rgba(0,0,0,.06); color: var(--sk-text); }
+.sk-icon-btn--attach { background: #d7d7da; color: var(--sk-text-sec); }
+.sk-icon-btn--attach svg { width: 16px; height: 16px; }
+/* "Aa" text-formatting toggle — real Slack renders this as the literal
+   characters "Aa", not an icon glyph (plates/slack/real/channel-thread-full-
+   desktop-view.jpg composer row). */
+.sk-icon-btn--aa { font-size: 13px; font-weight: 700; letter-spacing: -.02em; }
+.sk-composer-divider { width: 1px; height: 20px; background: var(--sk-otl-ter); margin: 0 4px; }
+.sk-composer-send { display: flex; align-items: center; gap: 1px; flex: 0 0 auto; }
+.sk-send-btn, .sk-send-caret {
+  height: var(--sk-send-h);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sk-otl-ter);
+  color: var(--sk-otl-pry);
+  border: 0;
+}
+.sk-send-btn { width: 32px; border-radius: var(--sk-radius-base) 0 0 var(--sk-radius-base); }
+.sk-send-caret { width: 18px; border-radius: 0 var(--sk-radius-base) var(--sk-radius-base) 0; border-left: 1px solid rgba(255,255,255,.3); }
+.sk-send-btn svg, .sk-send-caret svg { width: 16px; height: 16px; }
+.sk-composer.has-content .sk-send-btn,
+.sk-composer.has-content .sk-send-caret { background: var(--sk-green); color: #fff; }
+.sk-composer.has-content .sk-send-btn:hover,
+.sk-composer.has-content .sk-send-caret:hover { background: var(--sk-green-active); }
+
+/* =========================================================================
+   Thread pane (right-hand split, same width family as the message pane)
+   ========================================================================= */
+.sk-thread-pane {
+  width: 380px;
+  flex: 0 0 auto;
+  border-left: 1px solid var(--sk-otl-ter);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sk-thread-pane .sk-view-header { padding: 0 8px 0 16px; }
+.sk-thread-pane .sk-messages { padding-top: 0; }
+.sk-thread-root { padding: 12px 16px; box-shadow: inset 0 -1px 0 0 var(--sk-otl-ter); }
+.sk-thread-root .sk-msg { padding: 0; }
+.sk-thread-count-divider {
+  display: flex; align-items: center; gap: 8px;
+  margin: 10px 16px 6px;
+  font-size: 13px; font-weight: 700; color: var(--sk-text-sec);
+}
+.sk-thread-count-divider::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--sk-otl-ter); }
+.sk-thread-pane .sk-msg { padding: 6px 16px; }
+.sk-thread-pane .sk-composer-wrap { padding: 0 16px 16px; }
+
+/* ---- scrollbars (keep subtle, like real Slack) ---- */
+.sk-sidebar-scroll::-webkit-scrollbar, .sk-messages::-webkit-scrollbar { width: 10px; }
+.sk-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 6px; }
+.sk-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 6px; }
+
+/* ==========================================================================
+   APP HOME TAB (app-home.html) — promoted from dry run #4 K1's page-local CSS.
+   Plates: agentforce-home-tab-agent-list, home-apps-grid-agents-sidebar,
+   agentforce-agent-profile-panel. Lives inside .sk-pane next to an optional
+   .sk-thread-pane (used as the right-hand "Profile" panel).
+   ========================================================================== */
+.sk-view-header-app-icon { width: 22px; height: 22px; border-radius: 4px; flex: 0 0 auto; }
+
+.sk-home { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 64px 32px 24px; background: linear-gradient(160deg, var(--sk-aubergine-0) 0%, var(--sk-surface) 70%); }
+.sk-home-title { margin: 0 auto 22px; max-width: 520px; text-align: center; font-size: var(--sk-fs-headline); line-height: 1.2; font-weight: 900; color: var(--sk-text); letter-spacing: -.2px; }
+.sk-home-title em { font-style: normal; color: var(--sk-link); }
+.sk-home-chips { display: flex; justify-content: center; gap: var(--sk-space-075); margin-bottom: 28px; }
+.sk-home-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; min-width: 0; background: var(--sk-surface); border: 0; border-radius: var(--sk-radius-rounded); box-shadow: 0 1px 4px var(--sk-otl-ter); font: 700 var(--sk-fs-micro)/1.15 var(--sk-font); color: var(--sk-aubergine-80); text-align: left; cursor: pointer; }
+.sk-home-chip svg { width: 16px; height: 16px; flex: 0 0 auto; }
+/* 3 columns for 3 (or 6) cards; a 2-col grid of 3 cards leaves a last-row hole (layout-holes WARN). */
+.sk-home-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sk-space-100); max-width: 820px; margin: 0 auto; }
+.sk-agent-card { display: flex; flex-direction: column; gap: var(--sk-space-075); padding: var(--sk-space-100); background: var(--sk-surface); border: 1px solid var(--sk-otl-ter); border-radius: var(--sk-radius-large); box-shadow: 0 1px 3px var(--sk-otl-ter); cursor: pointer; }
+.sk-agent-card.is-selected { border-color: var(--sk-link); box-shadow: 0 0 0 1px var(--sk-link); }
+.sk-agent-card-av { position: relative; width: 44px; height: 44px; flex: 0 0 auto; }
+.sk-agent-card-av img { width: 44px; height: 44px; border-radius: var(--sk-radius-large); display: block; }
+.sk-agent-card-name { font-size: var(--sk-fs-base); font-weight: 900; color: var(--sk-text); line-height: 1.25; }
+.sk-agent-card-desc { margin-top: 4px; font-size: var(--sk-fs-caption); color: var(--sk-text-ter); line-height: 1.4; }
+.sk-agent-card-meta { margin-top: 8px; font-size: var(--sk-fs-caption); color: var(--sk-text-muted); }
+
+.sk-profile-body { padding: 16px; overflow-y: auto; }
+.sk-profile-hero { height: 190px; border-radius: var(--sk-radius-large) var(--sk-radius-large) 0 0; display: flex; align-items: center; justify-content: center; background: var(--sk-aubergine-0); }
+.sk-profile-hero img { width: 112px; height: 112px; border-radius: var(--sk-radius-xlarge); }
+.sk-profile-tag { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 0 0 var(--sk-radius-large) var(--sk-radius-large); background: var(--sk-surface-alt); font-size: var(--sk-fs-caption); color: var(--sk-link); }
+.sk-profile-tag img { width: 18px; height: 18px; border-radius: var(--sk-radius-base); }
+.sk-profile-name { margin: 16px 0 4px; font-size: var(--sk-fs-title); font-weight: 900; color: var(--sk-text); }
+.sk-profile-desc { font-size: var(--sk-fs-base); line-height: 1.4; color: var(--sk-text-ter); margin: 0 0 16px; }
+.sk-profile-heading { font-size: var(--sk-fs-base); font-weight: 900; color: var(--sk-text); margin-bottom: 10px; }
+.sk-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+.sk-skill { padding: 4px 8px; background: var(--sk-surface-alt); border-radius: var(--sk-radius-base); font-size: var(--sk-fs-caption); color: var(--sk-text); }
+
+/* =========================================================================
+   data-theme="v2" — the NEWER Slack (Windows / 2026 build) look, 2026-10-05, S8.
+   Opt-in: set data-theme="v2" on the .sk-window root (next to data-shell="slack@v1").
+   Every rule is scoped under [data-theme="v2"], so index.html / app-home.html
+   (no data-theme) render byte-identically. Source: BRK i-022 (lavender theme,
+   Today/Home/DMs/Activity/Files/Agents & tools rail, sidebar Find box, icon
+   section headings, green active row, Slackbot topbar button, AI-features
+   banner). Chrome colours here are sampled from the capture and live only in
+   chrome regions (topbar / rail / sidebar / channel-header / composer /
+   statusbar). Optional: add class "is-fullbleed" on <body> for a full-window
+   (non-boxed) capture.
+   ========================================================================= */
+body.is-fullbleed { margin: 0; height: 100%; overflow: hidden; background: #c5b8ff; padding: 0; display: block; }
+body.is-fullbleed .sk-window { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+
+[data-theme="v2"] { --sk-sidebar-w: 336px; background: #c5b8ff; /* lavender frame (tokens/slack.css --sk-v2-frame) */ }
+[data-theme="v2"] .sk-app, [data-theme="v2"] .sk-body { background: transparent; position: relative; }
+[data-theme="v2"] .sk-body { padding: 0 4px 52px 0; }          /* bottom = AI-features banner */
+
+/* top bar: no traffic lights / sidebar toggle in the Windows build */
+[data-theme="v2"] .sk-topnav { background: #c5b8ff; }
+[data-theme="v2"] .sk-topnav .sk-traffic,
+[data-theme="v2"] .sk-topnav .sk-topnav-btn[aria-label="Toggle sidebar"] { display: none; }
+[data-theme="v2"] .sk-topnav-history { justify-content: flex-end; gap: 6px; padding-right: 8px; }
+[data-theme="v2"] .sk-topnav-btn { color: #3e3265; }
+[data-theme="v2"] .sk-topnav-btn.is-disabled { color: #8e86a7; }
+[data-theme="v2"] .sk-topnav-search { background: #897dbf; color: #0f003e; max-width: none; margin: 0; }
+[data-theme="v2"] .sk-topnav-search svg { opacity: 1; }
+[data-theme="v2"] .sk-topnav-right { flex: 0 0 auto; }
+[data-theme="v2"] .sk-v2-slackbot-btn { width: 28px; height: 28px; border-radius: 6px; background: #ffffff80; display: flex; align-items: center; justify-content: center; padding: 0; flex: 0 0 auto; }
+[data-theme="v2"] .sk-v2-slackbot-btn svg { width: 22px; height: 22px; }
+[data-theme="v2"] .sk-v2-topnav-spacer { flex: 0 0 300px; }
+[data-theme="v2"] .sk-v2-app-pill { display: flex; align-items: center; height: 28px; border: 1px solid #aea0e6; border-radius: 8px; padding: 0 4px 0 3px; gap: 2px; margin-right: 8px; color: #0f003e; }
+[data-theme="v2"] .sk-v2-app-pill svg { width: 22px; height: 22px; display: block; }
+[data-theme="v2"] .sk-v2-app-pill .sk-v2-pill-sep { width: 1px; height: 18px; background: #aea0e6; margin: 0 3px 0 4px; }
+[data-theme="v2"] .sk-v2-app-pill .sk-v2-pill-chev svg { width: 14px; height: 14px; }
+
+/* rail: Today / Home / DMs / Activity / Files / Agents & tools, circle + and moon, white-ring presence */
+[data-theme="v2"] .sk-rail { background: #c5b8ff; padding-top: 6px; }
+[data-theme="v2"] .sk-account-switch { margin-bottom: 16px; }
+[data-theme="v2"] .sk-workspace-icon { background: #fcfcfd; color: #3651c0; border-radius: 8px; box-shadow: 0 0 0 1px #0f003e14; }
+[data-theme="v2"] .sk-rail-tab, [data-theme="v2"] .sk-rail-tab .sk-rail-tab-icon,
+[data-theme="v2"] .sk-rail-tab.is-active, [data-theme="v2"] .sk-rail-tab.is-active .sk-rail-tab-icon { color: #0f003e; }
+[data-theme="v2"] .sk-rail-tab.is-active .sk-rail-tab-icon { background: #aea0e6; }
+[data-theme="v2"] .sk-rail-tab:not(.is-active):hover .sk-rail-tab-icon { background: #aea0e680; } /* UNSAMPLED (LOW confidence): no plates/slack/real/* image shows this hover; value is a BRK guess. Needs a capture. 2026-10-06 */
+[data-theme="v2"] .sk-rail-tab-label { font-weight: 400; color: #0f003e; text-align: center; font-size: 11px; line-height: 12px; }
+[data-theme="v2"] .sk-rail-tabs { gap: 6px; }
+[data-theme="v2"] .sk-v2-rail-circle { width: 36px; height: 36px; border-radius: 50%; background: #aea0e6; color: #3e3265; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+[data-theme="v2"] .sk-v2-rail-circle svg { width: 20px; height: 20px; }
+[data-theme="v2"] .sk-rail-user img { border-radius: 8px; background: #fff; }
+/* r2 judge: bright green dot with a white ring (not the aubergine ring) */
+[data-theme="v2"] .sk-rail-user .sk-presence { width: 12px; height: 12px; background: #2bac76; box-shadow: 0 0 0 2px #ffffff; bottom: -3px; right: -3px; }
+[data-theme="v2"] .sk-rail-user .sk-presence svg { display: none; }
+
+/* sidebar: white card, Find box, icon section headings, green active row */
+[data-theme="v2"] .sk-sidebar { background: #f9f8ff; color: #3e3265; border-radius: 8px 0 0 8px; border-right: 1px solid #e3e0f0; }
+[data-theme="v2"] .sk-sidebar-ws { color: #0f003e; max-width: 220px; }
+[data-theme="v2"] .sk-sidebar-icon-btn { color: #3e3265; }
+[data-theme="v2"] .sk-sidebar-icon-btn:hover { background: #ece9f8; } /* UNSAMPLED (LOW confidence): no plates/slack/real/* image shows this hover; value is a BRK guess. Needs a capture. 2026-10-06 */
+[data-theme="v2"] .sk-v2-find { margin: 0 8px 10px; height: 28px; border: 1px solid #d9d5e8; border-radius: 6px; background: #fefeff; display: flex; align-items: center; gap: 6px; padding: 0 8px; color: #3e3265; font-size: 13px; }
+[data-theme="v2"] .sk-v2-find svg { width: 14px; height: 14px; flex: 0 0 auto; }
+[data-theme="v2"] .sk-row { color: #3e3265; padding-left: 16px; }
+[data-theme="v2"] .sk-row:hover { background: #ece9f8; } /* UNSAMPLED (LOW confidence): no plates/slack/real/* image shows this hover; value is a BRK guess. Needs a capture. 2026-10-06 */
+[data-theme="v2"] .sk-row.is-active { background: #71d18f; color: #001205; font-weight: 400; }
+[data-theme="v2"] .sk-row.is-active svg { color: #001205; }
+[data-theme="v2"] .sk-row-icon { opacity: 1; }
+[data-theme="v2"] .sk-row.is-child { padding-left: 32px; }
+[data-theme="v2"] .sk-row.is-strong .sk-row-label { font-weight: 700; color: #0f003e; }
+[data-theme="v2"] .sk-row .sk-v2-you { color: #8e86a7; margin-left: 6px; }
+[data-theme="v2"] .sk-row-dm-avatar.is-contain { object-fit: contain; background: #fefeff; }
+[data-theme="v2"] .sk-section-heading { color: #3e3265; font-weight: 400; font-size: 15px; padding-left: 16px; gap: 8px; }
+[data-theme="v2"] .sk-section-heading svg { width: 16px; height: 16px; }
+[data-theme="v2"] .sk-v2-sidebar-rule { height: 1px; background: #e3e0f0; margin: 8px 16px; }
+[data-theme="v2"] .sk-v2-drag-hint { padding: 0 16px 6px 32px; font-size: 13px; color: #3e3265; line-height: 22px; }
+[data-theme="v2"] .sk-sidebar-scroll::-webkit-scrollbar-thumb { background: #0f003e1f; }
+
+/* main card */
+[data-theme="v2"] .sk-main { border-left: 0; border-radius: 0 8px 8px 0; overflow: hidden; }
+[data-theme="v2"] .sk-body.has-panel .sk-main { border-radius: 0; }
+[data-theme="v2"] .sk-view-header-title { gap: 10px; font-size: 18px; }
+[data-theme="v2"] .sk-view-header-title .sk-v2-app-mark { width: 26px; height: 20px; object-fit: contain; }
+[data-theme="v2"] .sk-v2-hbox { width: 30px; height: 30px; border: 1px solid #dddbda; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; color: #1d1c1d; padding: 0; }
+[data-theme="v2"] .sk-v2-hbox svg { width: 18px; height: 18px; }
+[data-theme="v2"] .sk-v2-hplain { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #1d1c1d; padding: 0; }
+[data-theme="v2"] .sk-v2-hplain svg { width: 18px; height: 18px; }
+[data-theme="v2"] .sk-tabbar .sk-tab.is-active { box-shadow: inset 0 -2px 0 0 #1d1c1d; }
+[data-theme="v2"] .sk-msg-avatar.is-contain { object-fit: contain; background: transparent; }
+
+/* r2 judge: ONE pink New divider that runs through the Today pill, "New" flag at the far right */
+[data-theme="v2"] .sk-date-divider.is-new { margin-bottom: 12px; }
+[data-theme="v2"] .sk-date-divider.is-new::before,
+[data-theme="v2"] .sk-date-divider.is-new::after { background: #ef8eac; }
+[data-theme="v2"] .sk-date-divider .sk-new-flag { font-style: normal; font-size: 13px; color: #e01e5a; margin-left: 4px; }
+[data-theme="v2"] .sk-date-divider.is-new::after { flex: 1 1 auto; }
+
+/* r2 judge: solid down-caret (not a thin chevron) for collapsible labels */
+[data-theme="v2"] .sk-caret { width: 12px; height: 12px; flex: 0 0 auto; color: #1d1c1d; }
+
+/* r2 judge: inline emoji ~1.35em, vertical-align -0.3em (headings use a fixed px, see .sk-emoji-h) */
+[data-theme="v2"] .sk-emoji, .sk-sbpanel .sk-emoji { font-size: 1.35em; line-height: 1; vertical-align: -0.3em; display: inline-block; margin-right: 2px; }
+[data-theme="v2"] .sk-emoji-h, .sk-sbpanel .sk-emoji-h { font-size: 20px; }
+
+/* channel content: app alert + metric unfurl */
+[data-theme="v2"] .sk-v2-bold-line { font-weight: 700; font-size: 15px; line-height: 22px; color: #1d1c1d; }
+[data-theme="v2"] .sk-v2-text { font-size: 15px; line-height: 22px; color: #1d1c1d; white-space: normal; }
+[data-theme="v2"] .sk-v2-text p { margin: 8px 0 0; }
+[data-theme="v2"] .sk-v2-link { color: #1264a3; text-decoration: underline; font-size: 15px; line-height: 22px; display: block; margin: 8px 0; }
+[data-theme="v2"] .sk-v2-unfurl-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #616061; margin: 8px 0 6px; }
+[data-theme="v2"] .sk-v2-metric { width: 100%; max-width: 480px; border: 1px solid #dddbda; border-radius: 8px; background: #fff; overflow: hidden; }
+[data-theme="v2"] .sk-v2-metric-head { display: flex; gap: 12px; align-items: flex-start; padding: 14px 12px 0; }
+[data-theme="v2"] .sk-v2-metric-head img { width: 32px; height: 32px; }
+[data-theme="v2"] .sk-v2-metric-title { font-size: 15px; font-weight: 700; line-height: 20px; color: #1d1c1d; }
+[data-theme="v2"] .sk-v2-metric-sub { font-size: 13px; line-height: 18px; color: #1d1c1d; }
+[data-theme="v2"] .sk-v2-metric-value { font-size: 28px; line-height: 34px; padding: 22px 12px 0; color: #1d1c1d; }
+[data-theme="v2"] .sk-v2-metric-period { font-size: 13px; padding: 2px 12px 0; color: #1d1c1d; }
+[data-theme="v2"] .sk-v2-metric-delta { font-size: 15px; padding: 8px 12px 0; color: #1d1c1d; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+[data-theme="v2"] .sk-v2-chip-neg { background: #fff0f4; color: #c01343; padding: 1px 4px; border-radius: 3px; }
+[data-theme="v2"] .sk-v2-spark { display: block; margin: 10px 12px 0; width: calc(100% - 24px); }
+[data-theme="v2"] .sk-v2-metric-foot { border-top: 1px solid #dddbda; margin-top: 6px; padding: 12px; font-size: 13px; color: #616061; }
+[data-theme="v2"] .sk-v2-disabled-composer { margin: 0 20px 18px; height: 40px; border: 1px solid #dddbda; border-radius: 8px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #616061; }
+[data-theme="v2"] .sk-v2-prev-clip { height: 12px; overflow: hidden; display: flex; align-items: flex-end; flex: 0 0 auto; }
+[data-theme="v2"] .sk-v2-prev-clip .sk-thread-replies { margin: 0 0 0 68px; }
+[data-theme="v2"] .sk-v2-yesterday { display: flex; justify-content: center; margin: -4px 0 -6px; position: relative; z-index: 1; }
+[data-theme="v2"] .sk-v2-yesterday span { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: #1d1c1d; background: #fff; border: 1px solid #dddbda; border-radius: 16px; padding: 2px 10px; }
+[data-theme="v2"] .sk-v2-yesterday span svg { width: 12px; height: 12px; color: #616061; }
+[data-theme="v2"] .sk-thread-replies img.sk-v2-mini { width: 24px; height: 18px; object-fit: contain; }
+
+/* AI-features banner (statusbar region) */
+[data-theme="v2"] .sk-v2-banner { position: absolute; left: var(--sk-rail-w); right: 0; bottom: 0; height: 52px; background: #cdc8e8; color: #fffffe; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border-radius: 8px 0 0 0; }
+[data-theme="v2"] .sk-v2-banner a { color: #fffffe; text-decoration: underline; margin-left: 4px; }
+
+/* =========================================================================
+   Slackbot side panel (slackbot-panel.html) — the docked right-hand
+   conversation view. Works with or without data-theme="v2" (panel colours are
+   the shell's content tokens). Scroll rest: put data-scroll="anchor" on
+   .sk-messages and data-rest on the user's prompt (default), so the key
+   message is never scrolled off.
+   ========================================================================= */
+.sk-thread-pane.sk-sbpanel { width: 620px; background: #fff; border-left: 1px solid #dddbda; overflow: hidden; }
+.sk-sbpanel .sk-sb-head { height: 56px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 10px 0 16px; }
+.sk-sbpanel .sk-sb-title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 900; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-title img { width: 30px; height: 30px; border-radius: 6px; }
+.sk-sbpanel .sk-sb-actions { display: flex; align-items: center; gap: 6px; }
+.sk-sbpanel .sk-sb-btn { width: 30px; height: 30px; border: 1px solid #dddbda; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; color: #1d1c1d; padding: 0; }
+.sk-sbpanel .sk-sb-btn.is-plain { border: 0; background: transparent; }
+.sk-sbpanel .sk-sb-btn svg { width: 18px; height: 18px; }
+.sk-sbpanel .sk-sb-tabs { flex: 0 0 auto; display: flex; align-items: center; gap: 18px; padding: 0 16px; height: 36px; box-shadow: inset 0 -1px 0 0 #dddbda; }
+.sk-sbpanel .sk-sb-tab { display: flex; align-items: center; gap: 5px; height: 36px; font-size: 13px; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-tab svg { width: 16px; height: 16px; }
+.sk-sbpanel .sk-sb-tab.is-active { font-weight: 700; box-shadow: inset 0 -2px 0 0 #1d1c1d; }
+.sk-sbpanel .sk-sb-tab-add { position: relative; display: flex; align-items: center; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-tab-add svg { width: 18px; height: 18px; }
+.sk-sbpanel .sk-sb-tab-add::after { content: ''; position: absolute; top: -2px; right: -5px; width: 7px; height: 7px; border-radius: 50%; background: #1264a3; }
+.sk-sbpanel .sk-messages { padding-top: 0; }
+.sk-sbpanel .sk-thread-root { padding: 10px 16px; }
+.sk-sbpanel .sk-thread-root .sk-msg { padding: 0; }
+.sk-sbpanel .sk-msg { padding: 4px 16px; }
+.sk-sbpanel .sk-thread-count-divider { font-weight: 400; margin: 6px 16px 2px; }
+.sk-sbpanel .sk-composer-wrap { padding: 8px 16px 14px; }
+.sk-sbpanel .sk-composer-input:empty::before { content: attr(data-placeholder); color: #616061; }
+/* the hover toolbar sits in the right gutter; a message that shows it reserves that space so text is never covered */
+.sk-sbpanel .sk-msg-toolbar { top: 4px; right: 12px; }
+.sk-sbpanel .sk-msg.is-hover-demo { background: #f8f8f8; }
+.sk-sbpanel .sk-msg.has-toolbar .sk-msg-content { padding-right: 112px; }
+
+.sk-sbpanel .sk-sb-rich { font-size: 15px; line-height: 22px; color: #1d1c1d; white-space: normal; }
+.sk-sbpanel .sk-sb-rich p { margin: 0 0 8px; }
+.sk-sbpanel .sk-sb-rich h4 { font-size: 15px; font-weight: 700; margin: 0 0 4px; line-height: 22px; }
+.sk-sbpanel .sk-sb-rich ul, .sk-sbpanel .sk-sb-rich ol { margin: 0 0 6px; padding-left: 40px; }
+.sk-sbpanel .sk-sb-rich ul.is-disc li::marker { font-size: 19px; }
+.sk-sbpanel .sk-sb-rich li { margin: 0; padding-left: 2px; }
+.sk-sbpanel .sk-sb-rich blockquote { margin: 4px 0 10px; padding: 0 0 0 20px; border-left: 4px solid #dddbda; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-rich hr { border: 0; height: 1px; background: #dddbda; color: #dddbda; margin: 6px 0 14px; }
+.sk-sbpanel .sk-sb-used { display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; color: #616061; margin: 0 0 6px; }
+.sk-sbpanel .sk-sb-used svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.sk-sbpanel .sk-sb-used .sk-sb-chev { width: 12px; height: 12px; }
+.sk-sbpanel .sk-sb-used img { width: 18px; height: 13px; object-fit: contain; }
+.sk-sbpanel .sk-sb-used.is-head { margin: -1px 0 10px; }
+.sk-sbpanel .sk-sb-used .sk-sb-skill { color: #1264a3; background: #e8f4ff; border-radius: 4px; padding: 0 5px; }
+.sk-sbpanel .sk-sb-chip { color: #1264a3; background: #e8f4ff; border-radius: 4px; padding: 0 4px; display: inline-flex; align-items: center; gap: 4px; }
+.sk-sbpanel .sk-sb-chip svg { width: 15px; height: 15px; }
+.sk-sbpanel .sk-sb-code { font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size: 13px; color: #e01e5a; background: #f8f8f8; border: 1px solid #dddbda; border-radius: 4px; padding: 2px 4px; }
+
+/* rendered-viz card ("Content from <org>" footer) */
+.sk-sbpanel .sk-sb-viz { border: 1px solid #dddbda; border-radius: 12px; overflow: hidden; margin: 12px 0 8px; background: #fff; }
+.sk-sbpanel .sk-sb-viz-body { padding: 6px 4px 2px; }
+.sk-sbpanel .sk-sb-viz-body img { display: block; width: 100%; height: auto; }
+.sk-sbpanel .sk-sb-viz-foot { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: #f8f8f8; border-top: 1px solid #dddbda; font-size: 13px; color: #616061; }
+.sk-sbpanel .sk-sb-viz-foot img { width: 16px; height: 16px; }
+.sk-sbpanel .sk-sb-viz-foot .sk-sb-grow { flex: 1 1 auto; }
+.sk-sbpanel .sk-sb-viz-foot svg { width: 16px; height: 16px; color: #616061; }
+.sk-sbpanel .sk-sb-feedback { display: flex; justify-content: flex-end; gap: 14px; color: #1d1c1d; padding: 0 0 2px; }
+.sk-sbpanel .sk-sb-feedback svg { width: 18px; height: 18px; }
+
+/* work-object record cards */
+.sk-sbpanel .sk-sb-records-label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #616061; margin: 2px 0 8px; }
+.sk-sbpanel .sk-sb-records-label svg { width: 10px; height: 10px; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-record { display: flex; align-items: center; gap: 14px; max-width: 560px; padding: 16px 18px; border: 1px solid #dddbda; border-radius: 12px; background: #fff; margin: 0 0 8px; }
+.sk-sbpanel .sk-sb-record img { width: 42px; height: 42px; border-radius: 8px; flex: 0 0 auto; }
+.sk-sbpanel .sk-sb-record > div { min-width: 0; }
+.sk-sbpanel .sk-sb-record-title { font-size: 16px; font-weight: 700; line-height: 22px; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-record-sub { font-size: 14px; line-height: 20px; color: #616061; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* "records to create" preview table: fixed layout, six equal columns, headers never collide */
+.sk-sbpanel .sk-sb-rtc-head { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px; }
+.sk-sbpanel .sk-sb-rtc-title { font-size: 15px; font-weight: 700; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-rtc-tools { display: flex; gap: 6px; }
+.sk-sbpanel .sk-sb-rtc-tools .sk-sb-btn { width: 26px; height: 26px; border-radius: 6px; }
+.sk-sbpanel .sk-sb-rtc-tools .sk-sb-btn svg { width: 15px; height: 15px; }
+.sk-sbpanel .sk-sb-rtc { background: #f3f3f3; border-radius: 10px; padding: 0 4px 4px; }
+.sk-sbpanel .sk-sb-rtc table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 13px; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-rtc th { text-align: left; font-weight: 700; font-size: 13px; padding: 10px 6px 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-sbpanel .sk-sb-rtc th:first-child { padding-left: 10px; }
+.sk-sbpanel .sk-sb-rtc td { background: #fff; padding: 17px 6px 17px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid #dddbda; border-bottom: 1px solid #dddbda; }
+.sk-sbpanel .sk-sb-rtc tbody tr + tr td { border-top: 0; }
+.sk-sbpanel .sk-sb-rtc td:first-child { border-left: 1px solid #dddbda; padding-left: 10px; }
+.sk-sbpanel .sk-sb-rtc td:last-child { border-right: 1px solid #dddbda; }
+.sk-sbpanel .sk-sb-rtc tbody tr:first-child td:first-child { border-top-left-radius: 8px; }
+.sk-sbpanel .sk-sb-rtc tbody tr:first-child td:last-child { border-top-right-radius: 8px; }
+.sk-sbpanel .sk-sb-rtc tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+.sk-sbpanel .sk-sb-rtc tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+.sk-sbpanel .sk-sb-btns { display: flex; gap: 8px; margin: 12px 0 6px; }
+.sk-sbpanel .sk-sb-action { height: 30px; padding: 0 10px; border-radius: 4px; font-size: 13px; font-weight: 700; font-family: inherit; border: 1px solid #7c7a7f; background: #fff; color: #1d1c1d; }
+.sk-sbpanel .sk-sb-action.is-primary { background: #007a5a; border-color: #007a5a; color: #fff; }
+
+/* "Created N records" confirmation card */
+.sk-sbpanel .sk-sb-created { display: flex; align-items: center; justify-content: space-between; max-width: 480px; padding: 22px 20px; border: 1px solid #e8e8e8; border-radius: 12px; font-size: 15px; font-weight: 700; color: #1d1c1d; margin: 16px 0 8px; }
+.sk-sbpanel .sk-sb-created svg { width: 14px; height: 14px; }
+/* alert-setup confirmation (title with emoji + bullets) */
+.sk-sbpanel .sk-sb-alert h4 { margin-top: 6px; }

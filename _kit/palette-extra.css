@@ -1,0 +1,21 @@
+/* _kit/palette-extra.css: project color waiver read by fidelity-audit's color-palette rule.
+   Put ONLY colors sampled from this project's reference captures (customer workbook palettes, org
+   branding). Give every hex a provenance comment: which reference image and which element.
+   The audit lists this file in audit.md whenever it uses it. Kit-level product colors (Cosmos indigo,
+   Tableau built-in palettes) are already allowed; don't repeat them here.
+   Example:  --dd-scatter:#8450c7;  i-031 Stores-performance scatter marks  */
+:root {
+  --pi-aubergine:#4e104d;   captures 12-14 (2026-10-14_17-10-15/17-18-33/17-18-50) window frame + rail behind the sidebar, sampled
+  --pi-ws-teal:#0f6e7a;     DEMO-BRIEF §2 Brightwater wordmark teal; workspace tile "B" at far left (captures 12-14 tile position)
+  --pi-canvas-tint:#f4ecf5; capture 6/13 canvas-card icon tile background (Slack canvas file icon)
+  --pi-canvas-ic:#865588;   capture 6/13 canvas-card icon glyph (Slack canvas file icon)
+  --pi-sb-yellow:#edb22e;   Slack brand mark (Slackbot glyph) yellow, toolbar/menu Slackbot icon, captures 4 & 12
+  --pi-sb-blue:#36c4f0;     Slack brand mark (Slackbot glyph) blue, same element
+  --pi-band:#e5ecf7;        capture 2 Q3 Revenue Outlook projected-range band
+  --pi-sev-bg:#fef6e1; --pi-sev-fg:#8d5300; --pi-sev-bd:#efc66d;  capture 14 MEDIUM score pill (SLDS warning ramp)
+  --pi-ok-bg:#e3f8f0; --pi-ok-fg:#006147;  capture 10 green "Expected impact" callout
+  --pi-sev-high-bd:#f2b6c5; capture 14 HIGH score pill border (SLDS error ramp tint)
+  --pi-btn-bd:#b4b3b5;      capture 13 "Manage Alerts" outline button border
+  --pi-doc-tile:#3166dd;    capture 1 (16-14-59) Google Docs "DOC" file tile, sampled
+  --pi-report-ic:#4a7fd4;   captures 13-14 report file-card icon tile
+}
