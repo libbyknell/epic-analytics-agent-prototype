@@ -70,7 +70,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* activity row */
 .act{display:flex;align-items:flex-start;gap:.5rem;padding:.25rem .75rem;color:var(--ink2)}
 .act .ai{width:1rem;height:1rem;margin-top:.125rem;color:var(--mute);font-size:14px;line-height:1}
-.act .ai img{width:16px;height:16px;display:block;border-radius:3px}
+.act .ai:has(img){width:24px;height:24px;margin-top:0}
+.act .ai img{width:24px;height:24px;display:block;border-radius:4px}
+.act:has(.ai img){align-items:center}
+.act:has(.ai img) .sp{margin-top:0}
 .act .al{font-size:.75rem;line-height:1rem}
 .act .ck{color:var(--ok,#2e844a);font-size:13px;font-weight:700;width:.875rem;text-align:center;margin-top:.0625rem;line-height:1rem}
 .act .as{font-size:.75rem;line-height:1rem;color:var(--mute)}
@@ -268,7 +271,7 @@ async function openInsight(){
   $('empty').remove();$('title').textContent='Q3 revenue forecast risk';$('hist').style.display='inline';
   rowEl=document.createElement('div');rowEl.className='nr sel new';rowEl.innerHTML='<span class="l">Q3 revenue forecast risk</span><span class="st"></span>';
   $('recents').prepend(rowEl);
-  const rv=add(`<div class="act"><span class="ai"><img src="${TAB_LOGO}" alt=""></span><div><div class="al">Sage reviewed your Q3 forecast</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div><span class="sp" style="margin-left:.25rem"></span></div>`);
+  const rv=add(`<div class="act"><span class="ai"><img src="${TAB_LOGO}" alt=""></span><div><div class="al"><b>Sage</b> reviewed your Q3 forecast</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div><span class="sp" style="margin-left:.25rem"></span></div>`);
   await wait(2200);
   rv.querySelector('.sp').outerHTML='<span class="ck">✓</span>';
   await wait(900);
@@ -278,13 +281,13 @@ async function openInsight(){
 }
 function render(){ // rebuild thread up to n answers
   [...col.querySelectorAll('.qa')].forEach(e=>e.remove());
-  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act('Sage queried Sales Data Intelligence','Completed')+QA[i].a,'m--agent qa')}
+  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act('<b>Sage</b> queried Sales Data Intelligence','Completed')+QA[i].a,'m--agent qa')}
 }
 async function send(text,idx){
   busy=true;inp.value='';
   add(`<p>${text.replace(/</g,'&lt;')}</p>`,'m--user qa');
-  const t=add(think('Sage is analyzing your data…'),'qa');await wait(1500);t.remove();
-  if(idx!=null){n=idx+1;add(act('Sage queried Sales Data Intelligence','Completed')+QA[idx].a,'m--agent qa')}
+  const t=add(think('<b>Sage</b> is analyzing your data…'),'qa');await wait(1500);t.remove();
+  if(idx!=null){n=idx+1;add(act('<b>Sage</b> queried Sales Data Intelligence','Completed')+QA[idx].a,'m--agent qa')}
   else add('<p>For this prototype, press → or Tab to step through the next question.</p>','m--agent qa');
   busy=false;
 }
