@@ -71,6 +71,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .act{display:flex;align-items:flex-start;gap:.5rem;padding:.25rem .75rem;color:var(--ink2)}
 .act .ai{width:1rem;height:1rem;margin-top:.125rem;color:var(--mute);font-size:14px;line-height:1}
 .act .al{font-size:.75rem;line-height:1rem}
+.act .ck{color:var(--ok,#2e844a);font-size:13px;font-weight:700;width:.875rem;text-align:center;margin-top:.0625rem;line-height:1rem}
 .act .as{font-size:.75rem;line-height:1rem;color:var(--mute)}
 .act .sp{width:.875rem;height:.875rem;border:2px solid #d4dcec;border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin-top:.125rem}
 /* insight */
@@ -252,7 +253,6 @@ const think=t=>`<div class="act"><span class="sp"></span><div class="al">${t}</d
 const np=o=>{$('np').classList.toggle('open',o);$('npc').classList.toggle('open',o)};
 
 setTimeout(()=>{$('bell').classList.add('on','ring');$('toast').classList.add('show')},1800);
-setTimeout(()=>$('toast').classList.remove('show'),9500);
 $('bell').onclick=()=>{$('toast').classList.remove('show');np(!$('np').classList.contains('open'))};
 $('npx').onclick=()=>np(false);
 $('mark').onclick=()=>{$('nitem').classList.add('read');$('bell').classList.remove('on')};
@@ -266,8 +266,10 @@ async function openInsight(){
   $('empty').remove();$('title').textContent='Q3 revenue forecast risk';$('hist').style.display='inline';
   rowEl=document.createElement('div');rowEl.className='nr sel new';rowEl.innerHTML='<span class="l">Q3 revenue forecast risk</span><span class="st"></span>';
   $('recents').prepend(rowEl);
-  add(act('Sage reviewed your Q3 forecast','Sales Data Intelligence semantic model · Q3 pipeline'));
-  await wait(450);
+  const rv=add(`<div class="act"><span class="sp"></span><div><div class="al">Sage reviewed your Q3 forecast</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div></div>`);
+  await wait(2200);
+  rv.querySelector('.sp').outerHTML='<span class="ck">✓</span>';
+  await wait(900);
   add(ROOT);
   add('<div class="fb">Was this useful? <span>👍</span><span>👎</span></div>');
   inp.focus();
@@ -297,6 +299,7 @@ function back(){
 }
 function reset(){location.reload()}
 document.addEventListener('keydown',e=>{
+  if(!started&&!['Shift','Control','Alt','Meta'].includes(e.key)){e.preventDefault();openInsight();return}
   const inInput=document.activeElement===inp,has=inp.value.trim().length>0;
   if(e.key==='Tab'||e.key==='PageDown'||(e.key==='ArrowRight'&&(!inInput||!has))){e.preventDefault();if(!busy)next()}
   else if(e.key==='Enter'){e.preventDefault();if(busy)return;if(inInput&&has&&started){const v=inp.value.trim();const k=QA.findIndex(x=>x.q===v);send(v,k>=0&&k===n?k:null)}else next()}
