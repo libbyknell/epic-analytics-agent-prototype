@@ -70,6 +70,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* activity row */
 .act{display:flex;align-items:flex-start;gap:.5rem;padding:.25rem .75rem;color:var(--ink2)}
 .act .ai{width:1rem;height:1rem;margin-top:.125rem;color:var(--mute);font-size:14px;line-height:1}
+.act .ai img{width:16px;height:16px;display:block;border-radius:3px}
 .act .al{font-size:.75rem;line-height:1rem}
 .act .ck{color:var(--ok,#2e844a);font-size:13px;font-weight:700;width:.875rem;text-align:center;margin-top:.0625rem;line-height:1rem}
 .act .as{font-size:.75rem;line-height:1rem;color:var(--mute)}
@@ -248,7 +249,8 @@ const ROOT="<div class=\"m-root\"><div class=\"sk-v2-bold-line\">Q3 revenue like
 let started=false,n=0,busy=false,typed=null,rowEl=null;
 const down=()=>sc.scrollTo({top:sc.scrollHeight,behavior:'smooth'});
 function add(html,cls='m--agent'){const d=document.createElement('div');d.className='m '+cls;d.innerHTML=html;col.appendChild(d);down();return d}
-const act=(label,status)=>`<div class="act"><span class="ai">▦</span><div><div class="al">${label}</div>${status?`<div class="as">${status}</div>`:''}</div></div>`;
+const TAB_LOGO=document.querySelector('#toast .av img').src;
+const act=(label,status)=>`<div class="act"><span class="ai"><img src="${TAB_LOGO}" alt=""></span><div><div class="al">${label}</div>${status?`<div class="as">${status}</div>`:''}</div></div>`;
 const think=t=>`<div class="act"><span class="sp"></span><div class="al">${t}</div></div>`;
 const np=o=>{$('np').classList.toggle('open',o);$('npc').classList.toggle('open',o)};
 
