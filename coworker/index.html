@@ -268,7 +268,7 @@ async function openInsight(){
   $('empty').remove();$('title').textContent='Q3 revenue forecast risk';$('hist').style.display='inline';
   rowEl=document.createElement('div');rowEl.className='nr sel new';rowEl.innerHTML='<span class="l">Q3 revenue forecast risk</span><span class="st"></span>';
   $('recents').prepend(rowEl);
-  const rv=add(`<div class="act"><span class="sp"></span><div><div class="al">Sage reviewed your Q3 forecast</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div></div>`);
+  const rv=add(`<div class="act"><span class="ai"><img src="${TAB_LOGO}" alt=""></span><div><div class="al">Sage reviewed your Q3 forecast</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div><span class="sp" style="margin-left:.25rem"></span></div>`);
   await wait(2200);
   rv.querySelector('.sp').outerHTML='<span class="ck">✓</span>';
   await wait(900);
