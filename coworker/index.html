@@ -287,13 +287,13 @@ async function openInsight(){
 }
 function render(){ // rebuild thread up to n answers
   [...col.querySelectorAll('.qa')].forEach(e=>e.remove());
-  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act('<b>Sage</b> queried Sales Data Intelligence','Completed')+QA[i].a,'m--agent qa')}
+  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act('<b>Sage</b> queried the Sales Data Intelligence Semantic Model','Completed')+QA[i].a,'m--agent qa')}
 }
 async function send(text,idx){
   busy=true;inp.value='';
   add(`<p>${text.replace(/</g,'&lt;')}</p>`,'m--user qa');
   const t=add(think('<b>Sage</b> is analyzing your data…'),'qa');await wait(1500);t.remove();
-  if(idx!=null){n=idx+1;add(act('<b>Sage</b> queried Sales Data Intelligence','Completed')+QA[idx].a,'m--agent qa')}
+  if(idx!=null){n=idx+1;add(act('<b>Sage</b> queried the Sales Data Intelligence Semantic Model','Completed')+QA[idx].a,'m--agent qa')}
   else add('<p>For this prototype, press → or Tab to step through the next question.</p>','m--agent qa');
   busy=false;
 }
