@@ -311,7 +311,7 @@ async function openInsight(){
   $('conv').appendChild($('cw'));$('empty').remove();$('title').textContent='Q3 revenue forecast risk';$('hist').style.display='inline';
   rowEl=document.createElement('div');rowEl.className='nr sel new';rowEl.innerHTML='<span class="l">Q3 revenue forecast risk</span><span class="st"></span>';
   $('recents').prepend(rowEl);
-  const rv=add(`<div class="act"><span class="sp"></span><div><div class="al">Hunter used ${SKILL} to verify insights</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div></div>`);
+  const rv=add(`<div class="act"><span class="sp"></span><div><div class="al">Analysis powered by ${SKILL}</div><div class="as">Sales Data Intelligence semantic model · Q3 pipeline</div></div></div>`);
   await wait(2200);
   rv.querySelector('.sp').outerHTML='<span class="ck">✓</span>';
   await wait(900);
@@ -321,7 +321,7 @@ async function openInsight(){
 }
 function render(){ // rebuild thread up to n answers
   [...col.querySelectorAll('.qa')].forEach(e=>e.remove());
-  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act(`Hunter used ${SKILL} to verify insights`,'Called by Hunter · Completed')+QA[i].a,'m--agent qa')}
+  for(let i=0;i<n;i++){const u=add(`<p>${QA[i].q}</p>`,'m--user qa');const a=add(act(`Analysis powered by ${SKILL}`,'Called by Hunter · Completed')+QA[i].a,'m--agent qa')}
 }
 
 const HUNTER_IMG=document.querySelector('.agent i img').src;
@@ -330,7 +330,9 @@ async function runSteps(box){
     ...(found?[]:[
       ['hunter','<b>Hunter</b> is searching for the right skill','Skill search'],
       ['hunter',`<b>Hunter</b> found <b>${SKILL}</b>`,'Best match for Q3 forecast questions']]),
-    ['hunter',`<b>Hunter</b> is using <b>${SKILL}</b> to verify insights`,'Q3 pipeline · semantic model',2200],
+    ['hunter',`<b>Hunter</b> is using <b>${SKILL}</b> to gather data`,'Q3 pipeline · semantic model',1500],
+    ['hunter',`<b>Hunter</b> is using <b>${SKILL}</b> to generate analysis`,'',1500],
+    ['hunter',`<b>Hunter</b> is using <b>${SKILL}</b> to verify analysis`,'',1500],
     ['hunter','<b>Hunter</b> is preparing your answer','']
   ];
   for(let i=0;i<steps.length;i++){
@@ -348,7 +350,7 @@ async function send(text,idx){
   busy=true;inp.value='';
   add(`<p>${text.replace(/</g,'&lt;')}</p>`,'m--user qa');
   const t=add('<div class="steps" id="stp"></div>','qa');await runSteps(t.querySelector('.steps'));t.remove();
-  if(idx!=null){n=idx+1;add(act(`Hunter used ${SKILL} to verify insights`,'Called by Hunter · Completed')+QA[idx].a,'m--agent qa')}
+  if(idx!=null){n=idx+1;add(act(`Analysis powered by ${SKILL}`,'Called by Hunter · Completed')+QA[idx].a,'m--agent qa')}
   else add('<p>For this prototype, press → or Tab to step through the next question.</p>','m--agent qa');
   busy=false;
 }
